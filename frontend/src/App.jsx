@@ -1,5 +1,6 @@
 import Home from './pages/Home.jsx';
 import BottomNav from './components/BottomNav.jsx';
+import BikeRequestList from "./components/BikeRequestList";
 
 export default function App() {
   return (
