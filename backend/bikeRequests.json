@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "start": "Shop A",
+    "ziel": "Shop B",
+    "transporteur": "Luis",
+    "grund": "Reservierung",
+    "zeitpunkt": "2025-08-05T14:00:00",
+    "ersteller": "Jan",
+    "fahrrad": "E-Bike 02",
+    "anmerkung": "Kunde hat das Rad um 15:00 Uhr reserviert"
+  },
+  {
+    "id": 2,
+    "start": "Shop C",
+    "ziel": "Shop A",
+    "transporteur": "Marta",
+    "grund": "Reparatur",
+    "zeitpunkt": "2025-08-06T10:00:00",
+    "ersteller": "Anna",
+    "fahrrad": "MTB 12",
+    "anmerkung": "Hinterbremse defekt, bitte vorsichtig transportieren"
+  }
+]
