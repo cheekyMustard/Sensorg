@@ -5,6 +5,9 @@ export default function Home() {
         <div className="bg-base p-4 border-2 border-primary rounded">
           <h2 className="font-bold text-neutral mb-2">🚚 Delivery Requests</h2>
           <p className="text-neutral">Offene Lieferanfragen zwischen Shops</p>
+            <div className="max-w-3xl mx-auto mt-10">
+              <BikeRequestList />
+            </div>
         </div>
         <div className="bg-base p-4 rounded">
           <h2 className="font-bold text-neutral mb-2">📝 Notes</h2>
