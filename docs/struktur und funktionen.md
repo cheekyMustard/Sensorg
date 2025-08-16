@@ -1,4 +1,4 @@
-# ✅ ToDo-Liste für BikeApp Wireframe und Funktionen
+# ✅ ToDo-Liste für BikeApp
 
 ## Wireframe Designen
 
@@ -23,7 +23,9 @@
   - [ ] Profile  
     - [ ] Profilbild und Name bearbeiten  
     - [ ] Witze-Sammlung  
-      - [ ] Hinzufügen von Witzen (Bild oder Text)  
+      - [ ] Hinzufügen von Witzen (Bild oder Text)
+  - [ ] Scanner
+  - [ ] Foto-Check
 
 ## Funktionen der App
 
@@ -86,4 +88,11 @@
     - [ ] Wissenswertes über Fahrräder  
     - [ ] Technisches Wissen  
     - [ ] Tipps zur Reinigung  
-    - [ ] Worauf man im Shop achten sollte  
+    - [ ] Worauf man im Shop achten sollte
+
+- [ ] Barcode Scanner
+  - [ ] Fuer Inventur
+     
+- [ ] Foto-Check
+  - [ ] Zur Absicherung, falls Fahrrad zurueck kommt und nicht sicher ist, woher Schaeden kamen.
+  - [ ] Temporaere Datenbank mit Bild, Fahrrad und Name des Kunden bis Fahrrad zurueck und Aktzeptiert ist.
