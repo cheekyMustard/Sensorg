@@ -1,17 +1,13 @@
-import Home from './pages/Home.jsx';
-import BottomNav from './components/BottomNav.jsx';
-import BikeRequestList from "./components/BikeRequestList";
+import { Outlet } from 'react-router-dom';
+import RadNavigation from './components/RadNavigation';
 
-export default function App() {
+function App() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="p-4 bg-primary text-white">
-        <h1 className="text-2xl font-bold">Sensational Organiser</h1>
-      </header>
-      <main className="flex-1">
-        <Home />
-      </main>
-      <BottomNav />
+    <div className="relative min-h-screen bg-[#D1BBA2] text-[#2D2D2D]">
+      <Outlet />
+      <RadNavigation />
     </div>
   );
 }
+
+export default App;
