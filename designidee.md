@@ -87,6 +87,10 @@ CopyEdit
 
 * ⚙️ Admin
 
+* Barcode Scanner
+
+* Foto-Absicherung
+
 **Stil:**
 
 * Vollflächiger Balken am unteren Bildschirmrand
