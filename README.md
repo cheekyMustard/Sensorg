@@ -30,6 +30,8 @@
     - [ ] Admin
     - [ ] Profile inkl. Bild & Namen bearbeiten
     - [ ] Witze Sammlung
+    - [ ] Barcode Scanner fuer Inventur oder anderes.
+    - [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden")
 
 ## 3. 🔐 Authentifizierung & Rollen
 
@@ -49,6 +51,7 @@
   - [ ] `nice_to_know`
   - [ ] `jokes`
   - [ ] `bike_photos`
+  - [ ] `fotos` (mit client_name, bike, evtl. signature)
 - [ ] Beziehungen & Constraints definieren
 - [ ] Mockdaten einfügen zur Entwicklung
 
