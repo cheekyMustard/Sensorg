@@ -1,3 +1,5 @@
+import BikeRequestList from '../components/BikeRequestList.jsx';
+
 export default function Home() {
   return (
     <div className="pb-16">
