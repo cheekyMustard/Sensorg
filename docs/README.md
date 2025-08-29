@@ -28,7 +28,6 @@
     - [ ] Notes
     - [ ] Delivery
     - [ ] Admin
-    - [ ] Profile inkl. Bild & Namen bearbeiten
     - [ ] Witze Sammlung
     - [ ] Barcode Scanner fuer Inventur oder anderes.
     - [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden")
@@ -44,7 +43,7 @@
 ## 4. 📦 Datenbankmodellierung
 
 - [ ] PostgreSQL Tabellen:
-  - [ ] `users` (mit Rollen, Profilbild, etc.)
+  - [ ] `users` (mit Rollen, Namen, etc.)
   - [ ] `deliveries`
   - [ ] `notes`
   - [ ] `daily_tasks`
@@ -64,6 +63,7 @@
   - [ ] Bike, Datum, Dauer
   - [ ] Status mit Checkbox (open → in progress → done)
   - [ ] Erinnerung bei in progress
+  - [ ] Erinnerung bei "done", das Bike im System umzustellen (es wird automatisch eine Notes erstellt in dem jeweiligen Shop, die dann abgearbeitet werden kann)
 
 ### 5.2 📝 Notes-System
 
