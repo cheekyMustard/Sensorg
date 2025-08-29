@@ -27,24 +27,22 @@
   - [ ] Seitenstruktur:
     - [ ] Notes
     - [ ] Delivery
-    - [ ] Admin
-    - [ ] Profile inkl. Bild & Namen bearbeiten
-    - [ ] Witze Sammlung
-    - [ ] Barcode Scanner fuer Inventur oder anderes.
-    - [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden")
+    - [ ] Admin / Profile 
+    //- [ ] Barcode Scanner fuer Inventur oder anderes. (erstmal nicht)
+    //- [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden") (erstmal nicht)
 
 ## 3. 🔐 Authentifizierung & Rollen
 
 - [ ] Backend Setup mit Express & JWT
 - [ ] User Modell mit Rollen:
-  - [ ] Mechanic, Driver, Manager, Cleaner etc.
+  - [ ] Mechanic, Driver, Manager, Cleaner, Organiser, Seller, socialmedia etc.
 - [ ] Login-/Sessionlogik mit Frontend verknüpfen
-- [ ] Zugriffsbeschränkung je nach Rolle
+- [ ] Zugriffsrechte und darstellung je nach Rolle
 
 ## 4. 📦 Datenbankmodellierung
 
 - [ ] PostgreSQL Tabellen:
-  - [ ] `users` (mit Rollen, Profilbild, etc.)
+  - [ ] `users`
   - [ ] `deliveries`
   - [ ] `notes`
   - [ ] `daily_tasks`
@@ -64,6 +62,9 @@
   - [ ] Bike, Datum, Dauer
   - [ ] Status mit Checkbox (open → in progress → done)
   - [ ] Erinnerung bei in progress
+- [ ] Bike Delivery Übersicht: (wenn man auf die Seite geht)
+  - [ ] Anzeige von allen anstehenden Deliveries sortiert nach Shop.
+  - [ ] Wie ein Kalender. (Im PC Browser anders als auf dem Handy)
 
 ### 5.2 📝 Notes-System
 
@@ -72,7 +73,7 @@
   - [ ] Prioritäten: Low, Medium, High
   - [ ] Creator/Editor System
   - [ ] Antwortbereich (andersfarbig)
-  - [ ] 1 Tag Nachlaufzeit für "done"
+  - [ ] 1 Tag nach "done" ins Archiv
   - [ ] Archivfunktion für alte Einträge (für berechtigte User)
 
 ### 5.3 ✅ What else can be done
@@ -98,17 +99,20 @@
   - [ ] Upload-Funktion mit Bike-Zuordnung
   - [ ] Speicherung & Einsicht
 
-## 7. 🧑‍💼 Adminbereich
+## 7. 🧑‍💼 Adminbereich (Wie profil, nur zusätzliche Funktionen)
 
 - [ ] Benutzer anlegen mit Rollen
-- [ ] Übersicht & Verwaltung
+- [ ] Übersicht & Verwaltung 
 - [ ] Rechtezuweisung
 - [ ] Passwort ändern / zurücksetzen
 
+
 ## 8. 📱 Profilseite
 
-- [ ] Profilbild & Name ändern
-- [ ] Rollenübersicht einsehbar
+- [ ] Erstellen von Witzen
+- [ ] Anzeige vo laufenden Requests oder notes die man angenommen hat
+- [ ] Mögliche Anzeige von vergangenen abgeschlossenen Requests oder Notes
+- [ ] Nice to know & What else can be done Erstellen (nur admins oder berechtigte User)
 
 ## 9. 🧪 Testing & Validierung
 

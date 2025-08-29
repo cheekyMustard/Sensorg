@@ -15,17 +15,21 @@
       - [ ] Name  
       - [ ] Password  
       - [ ] Role (mehrfach möglich):  
-        - [ ] Mechanic  
-        - [ ] Driver  
-        - [ ] Manager  
-        - [ ] Cleaner  
-        - [ ] Weitere...  
-  - [ ] Profile  
-    - [ ] Profilbild und Name bearbeiten  
+        - [ ] mechanic  
+        - [ ] driver  
+        - [ ] manager  
+        - [ ] socialmedia  
+        - [ ] organiser
+        - [ ] seller
+        - [ ] cleaner 
+  - [ ] Profile   
     - [ ] Witze-Sammlung  
       - [ ] Hinzufügen von Witzen (Bild oder Text)
-  - [ ] Scanner
+  - [ ] Barcode-Scanner
+    - [ ] Einfacher Barcode Scanner zum schnellen Kopieren und einfügen und Teilen mit anderen
   - [ ] Foto-Check
+    - [ ] Datenbank mit Fotos mit Bezug zum Mieter/Kunden, Temporär, bis zum nächsten ausleihen, um Werkschäden zu prüfen.
+
 
 ## Funktionen der App
 
@@ -38,7 +42,12 @@
     - [ ] in progress  
       - [ ] Reminder am Schichtanfang und -ende für zugewiesene Benutzer  
     - [ ] done  
-      - [ ] Beim Klick auf "open" -> Frage, ob Bike im System umgelegt wurde. Falls ja, auf "done" setzen  
+      - [ ] Beim Klick auf "done" -> Frage, ob Bike im System umgelegt wurde. Falls ja, auf "done" setzen, Falls nein -> auf "in Progress" lassen  
+  - [ ] Datenbankeinträge:  
+    - [ ] Creator  
+    - [ ] Editor (der die delivery annimmt)  
+    - [ ] Date  
+    - [ ] Status   
 
 - [ ] Allgemeine Notizen im jeweiligen Shop  
   - [ ] Materialanfrage  
@@ -61,7 +70,7 @@
     - [ ] Content  
   - [ ] Inhalt:  
     - [ ] Creator kann Inhalt bearbeiten  
-    - [ ] Editor kann bearbeiten → Änderungen werden sichtbar in anderer Schrift/Farbe dargestellt  
+    - [ ] Editor kann bearbeiten  
   - [ ] Wenn Status auf "done":  
     - [ ] Bleibt 1 Tag auf Startseite und Notes-Page unter allen offenen oder in progress  
   - [ ] Alte Einträge ins Archiv:  
@@ -70,6 +79,8 @@
 - [ ] "What else can be done" Box  
   - [ ] Auf Startseite und Unterseite verfügbar  
   - [ ] Datenbankeinträge durch Admin oder bestimmte Mitarbeiter eintragbar  
+  - [ ] Sind meistens Shop-Bezogen
+  - [ ] wenn "in progress" kann es nicht von anderen übernommen werden
   - [ ] Kategorien:  
     - [ ] Daily Check  
       - [ ] Check Reservations for next Day  
@@ -95,4 +106,4 @@
      
 - [ ] Foto-Check
   - [ ] Zur Absicherung, falls Fahrrad zurueck kommt und nicht sicher ist, woher Schaeden kamen.
-  - [ ] Temporaere Datenbank mit Bild, Fahrrad und Name des Kunden bis Fahrrad zurueck und Aktzeptiert ist.
+  - [ ] Temporaere Datenbank mit Bild, Fahrrad und Name des Kunden bis Fahrrad erneut ausgeliehen wird, um zu prüfen, ob keine Lagerschäden entstanden sind.
