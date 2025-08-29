@@ -27,9 +27,16 @@
   - [ ] Seitenstruktur:
     - [ ] Notes
     - [ ] Delivery
+<<<<<<< HEAD
     - [ ] Admin / Profile 
     //- [ ] Barcode Scanner fuer Inventur oder anderes. (erstmal nicht)
     //- [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden") (erstmal nicht)
+=======
+    - [ ] Admin
+    - [ ] Witze Sammlung
+    - [ ] Barcode Scanner fuer Inventur oder anderes.
+    - [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden")
+>>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
 
 ## 3. 🔐 Authentifizierung & Rollen
 
@@ -42,7 +49,11 @@
 ## 4. 📦 Datenbankmodellierung
 
 - [ ] PostgreSQL Tabellen:
+<<<<<<< HEAD
   - [ ] `users`
+=======
+  - [ ] `users` (mit Rollen, Namen, etc.)
+>>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
   - [ ] `deliveries`
   - [ ] `notes`
   - [ ] `daily_tasks`
@@ -62,9 +73,13 @@
   - [ ] Bike, Datum, Dauer
   - [ ] Status mit Checkbox (open → in progress → done)
   - [ ] Erinnerung bei in progress
+<<<<<<< HEAD
 - [ ] Bike Delivery Übersicht: (wenn man auf die Seite geht)
   - [ ] Anzeige von allen anstehenden Deliveries sortiert nach Shop.
   - [ ] Wie ein Kalender. (Im PC Browser anders als auf dem Handy)
+=======
+  - [ ] Erinnerung bei "done", das Bike im System umzustellen (es wird automatisch eine Notes erstellt in dem jeweiligen Shop, die dann abgearbeitet werden kann)
+>>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
 
 ### 5.2 📝 Notes-System
 
