@@ -47,23 +47,26 @@ router.get('/', async (req, res, next) => {
     const isPrivileged = hasRole(req.user, 'admin', 'organiser');
     const shopId = req.user.shop_id;
 
-    // Approval visibility: approved always visible; pending/rejected only for approvers or creator
-    const approvalClause = isPrivileged
-      ? ''
-      : `and (t.approval_status = 'approved' or t.created_by_user_id = '${req.user.id}')`;
-
     let where, params;
     if (isPrivileged && !shopId) {
-      where  = `t.is_active = true ${approvalClause}`;
+      where  = 't.is_active = true';
       params = [];
     } else {
-      where  = `t.is_active = true and (t.shop_id = $1 or t.shop_id is null) ${approvalClause}`;
+      where  = 't.is_active = true and (t.shop_id = $1 or t.shop_id is null)';
       params = [shopId];
     }
 
+    // Approval visibility: approved always visible; pending/rejected only for approvers or creator
+    if (!isPrivileged) {
+      params.push(req.user.id);
+      where += ` and (t.approval_status = 'approved' or t.created_by_user_id = $${params.length})`;
+    }
+
+    // Completion join clause — uses a separate param index
     const completionShopClause = shopId
-      ? `and tc.shop_id = '${shopId}'`
+      ? `and tc.shop_id = $${params.length + 1}`
       : `and tc.shop_id is null`;
+    if (shopId) params.push(shopId);
 
     const { rows } = await pool.query(`
       select t.*,
