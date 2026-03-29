@@ -4,11 +4,13 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useUpdateKb, useDeleteKb } from '../../hooks/useKb.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
 import ImageUploader from '../ImageUploader/ImageUploader.jsx';
+import ImageLightbox from '../ImageLightbox/ImageLightbox.jsx';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 function KbImage({ url, alt }) {
-  const [err, setErr] = useState(false);
+  const [err,  setErr]  = useState(false);
+  const [open, setOpen] = useState(false);
   const src = url.startsWith('/uploads/') ? `${API_BASE}${url}` : url;
   if (err) return (
     <div className="mb-2 flex items-center justify-center gap-1 rounded-lg bg-stone-100 py-3 text-xs text-stone-400">
@@ -16,8 +18,15 @@ function KbImage({ url, alt }) {
     </div>
   );
   return (
-    <img src={src} alt={alt} onError={() => setErr(true)}
-      className="mb-2 w-full rounded-lg object-cover" style={{ maxHeight: 200 }} />
+    <>
+      <img
+        src={src} alt={alt} onError={() => setErr(true)}
+        onClick={() => setOpen(true)}
+        className="mb-2 rounded-lg object-cover cursor-zoom-in"
+        style={{ maxHeight: 120, width: 'auto', maxWidth: '100%' }}
+      />
+      {open && <ImageLightbox src={src} alt={alt} onClose={() => setOpen(false)} />}
+    </>
   );
 }
 

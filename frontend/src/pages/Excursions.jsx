@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2, X, Globe, ImageOff } from 'lucide-react';
 import ImageUploader from '../components/ImageUploader/ImageUploader.jsx';
 import { useExcursions, useCreateExcursion, useDeleteExcursion, useApproveExcursion, useRejectExcursion } from '../hooks/useExcursions.js';
+import ImageLightbox from '../components/ImageLightbox/ImageLightbox.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useShops } from '../hooks/useRequests.js';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog.jsx';
@@ -163,8 +164,9 @@ function ExcursionCard({ entry }) {
   const deleteMutation    = useDeleteExcursion();
   const approveMutation   = useApproveExcursion();
   const rejectMutation    = useRejectExcursion();
-  const [confirm, setConfirm]   = useState(false);
-  const [imgError, setImgError] = useState(false);
+  const [confirm,   setConfirm]   = useState(false);
+  const [imgError,  setImgError]  = useState(false);
+  const [lightbox,  setLightbox]  = useState(false);
 
   const colors            = companyColor(entry.company);
   const canDelete         = user?.roles?.includes('admin') || entry.created_by_user_id === user?.id;
@@ -184,14 +186,25 @@ function ExcursionCard({ entry }) {
         }}
       >
 
-        {/* Image */}
+        {/* Image — small thumbnail, click to expand */}
         {entry.image_url && !imgError && (
-          <img
-            src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
-            alt={entry.topic}
-            className="w-full max-h-48 object-cover"
-            onError={() => setImgError(true)}
-          />
+          <>
+            <img
+              src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
+              alt={entry.topic}
+              className="cursor-zoom-in object-cover"
+              style={{ maxHeight: 100, width: 'auto', maxWidth: '100%' }}
+              onError={() => setImgError(true)}
+              onClick={() => setLightbox(true)}
+            />
+            {lightbox && (
+              <ImageLightbox
+                src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
+                alt={entry.topic}
+                onClose={() => setLightbox(false)}
+              />
+            )}
+          </>
         )}
         {entry.image_url && imgError && (
           <div className="flex items-center justify-center gap-2 py-4 text-xs text-gray-400 bg-gray-50">

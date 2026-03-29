@@ -60,6 +60,20 @@ router.post('/:id/status', requireRole('mechanic', 'admin'), async (req, res, ne
       [req.params.id, to, takenBy]
     );
 
+    if (to === 'done') {
+      const bikeLabels = rr.bike_labels.join(', ');
+      await client.query(
+        `insert into tasks (shop_id, title, description, recurrence_unit, recurrence_interval, is_one_time, created_by_user_id)
+         values ($1, $2, $3, 'day', 1, true, $4)`,
+        [
+          rr.shop_id,
+          `Change bike back to normal in BRM: ${bikeLabels}`,
+          `Repair of ${bikeLabels} has been completed. Change the bike(s) back to "available" status in the reservation system.`,
+          req.user.id,
+        ]
+      );
+    }
+
     await client.query('commit');
     res.json(updated[0]);
   } catch (err) {
