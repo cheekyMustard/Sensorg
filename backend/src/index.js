@@ -1,47 +1,54 @@
+import 'dotenv/config';
 import express from 'express';
-import fs from 'fs';
-import path from 'path';
+import cors from 'cors';
 import { fileURLToPath } from 'url';
+import path from 'path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import authRouter from './routes/auth.js';
+import bikesRouter from './routes/bikes.js';
+import requestsRouter from './routes/requests.js';
+import shopsRouter from './routes/shops.js';
+import pushRouter from './routes/push.js';
+import adminRouter from './routes/admin.js';
+import notesRouter from './routes/notes.js';
+import tasksRouter from './routes/tasks.js';
+import kbRouter    from './routes/kb.js';
+import usersRouter     from './routes/users.js';
+import excursionsRouter    from './routes/excursions.js';
+import repairRequestsRouter from './routes/repair_requests.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// JSON-Body-Parsing erlauben (für POST später)
+app.use(cors());
 app.use(express.json());
 
-// API: GET alle Bike-Anfragen
-app.get('/api/bike-requests', (req, res) => {
-  const filePath = path.join(__dirname, '../data/bikeRequests.json');
-  fs.readFile(filePath, 'utf-8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Datei konnte nicht gelesen werden.' });
-    }
-    res.json(JSON.parse(data));
-  });
+app.use('/api/auth', authRouter);
+app.use('/api/bikes', bikesRouter);
+app.use('/api/requests', requestsRouter);
+app.use('/api/shops', shopsRouter);
+app.use('/api/push',  pushRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/notes', notesRouter);
+app.use('/api/tasks', tasksRouter);
+app.use('/api/kb',    kbRouter);
+app.use('/api/users',      usersRouter);
+app.use('/api/excursions',      excursionsRouter);
+app.use('/api/repair-requests', repairRequestsRouter);
+
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
-// OPTIONAL: API POST (neue Anfrage hinzufügen)
-app.post('/api/bike-requests', (req, res) => {
-  const filePath = path.join(__dirname, '../data/bikeRequests.json');
-  const newEntry = req.body;
+// Serve frontend in production
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendDist = path.join(__dirname, '../../frontend-dist');
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(frontendDist));
+  app.get('*', (_req, res) => res.sendFile(path.join(frontendDist, 'index.html')));
+}
 
-  fs.readFile(filePath, 'utf-8', (err, data) => {
-    if (err) return res.status(500).json({ error: 'Fehler beim Lesen.' });
+const PORT = process.env.PORT ?? 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-    const requests = JSON.parse(data);
-    newEntry.id = requests.length + 1;
-    requests.push(newEntry);
-
-    fs.writeFile(filePath, JSON.stringify(requests, null, 2), (err) => {
-      if (err) return res.status(500).json({ error: 'Fehler beim Speichern.' });
-      res.status(201).json({ success: true, newEntry });
-    });
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚲 Bike-Request API läuft auf Port ${PORT}`);
-});
+export default app;

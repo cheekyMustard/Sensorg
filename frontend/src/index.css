@@ -1,3 +1,30 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+:root {
+  --bottom-nav-height: 4rem;
+
+  /* Bike Sensations brand palette */
+  --brand:        #E8772A;   /* burnt orange  */
+  --brand-dark:   #C96318;   /* hover shade   */
+  --charcoal:     #1d1d1d;   /* dark base     */
+  --white-read:   #ceb8a9;
+  --brand-green:  #5BA85C;   /* tropical green */
+  --brand-gold:   #D4A574;   /* logo gold     */
+  --brand-bg:     #e4e4e4;   /* light grey background */
+  --brand-border: #F0D9C8;   /* warm card border */
+  --brand-blue:   #4A90A4;   /* teal-blue (KB)   */
+}
+
+body {
+  margin: 0;
+  background: var(--brand-bg);
+  color: #111827;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test:*)",
+      "Bash(PGPASSWORD=password \"/d/Dev/PostGre/bin/psql.exe\" -U postgres -c \"SELECT version\\(\\);\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(PGPASSWORD=password \"/d/Dev/PostGre/bin/psql.exe\" -U postgres -c \"CREATE DATABASE sensorg;\")"
+    ]
+  }
+}

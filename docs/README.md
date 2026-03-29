@@ -8,18 +8,18 @@
   - [ ] Rollenmodell definieren (Admin, Mechaniker, Fahrer, etc.)
 
 - [ ] Technologiestack festlegen
-  - [x] Frontend: React + Vite
-  - [x] Styling: TailwindCSS
-  - [x] Backend: Express (Node.js)
-  - [x] Datenbank: PostgreSQL
-  - [x] Auth: JWT
+  - [ ] Frontend: React + Vite
+  - [ ] Styling: TailwindCSS
+  - [ ] Backend: Express (Node.js)
+  - [ ] Datenbank: PostgreSQL
+  - [ ] Auth: JWT
 
 ## 2. 🧩 Wireframe & UI/UX
 
 - [ ] Grobes Design für alle Seiten
   - [ ] Login Page
   - [ ] Home mit:
-    - [ ] Delivery Vorschau (zeitlich sortiert)
+    - [ ] Delivery Vorschau (zeitlich sortiert, Accordion, Farblogik)
     - [ ] Notes Vorschau (rollen- und prioritätsbasiert)
     - [ ] Zufallswitz (Meme oder Text)
     - [ ] "What else can be done"-Box
@@ -27,16 +27,10 @@
   - [ ] Seitenstruktur:
     - [ ] Notes
     - [ ] Delivery
-<<<<<<< HEAD
-    - [ ] Admin / Profile 
-    //- [ ] Barcode Scanner fuer Inventur oder anderes. (erstmal nicht)
-    //- [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden") (erstmal nicht)
-=======
     - [ ] Admin
     - [ ] Witze Sammlung
     - [ ] Barcode Scanner fuer Inventur oder anderes.
-    - [ ] Foto-absicherung bei Fahrradverleih (vielleicht mit Signatureingabe als "gesehen bestaetigung vom Kunden")
->>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
+    - [ ] Foto-absicherung bei Fahrradverleih (mit Signatureingabe)
 
 ## 3. 🔐 Authentifizierung & Rollen
 
@@ -44,59 +38,46 @@
 - [ ] User Modell mit Rollen:
   - [ ] Mechanic, Driver, Manager, Cleaner, Organiser, Seller, socialmedia etc.
 - [ ] Login-/Sessionlogik mit Frontend verknüpfen
-- [ ] Zugriffsrechte und darstellung je nach Rolle
+- [ ] Zugriffsrechte und Darstellung je nach Rolle
 
 ## 4. 📦 Datenbankmodellierung
 
 - [ ] PostgreSQL Tabellen:
-<<<<<<< HEAD
+  - [ ] `shops`
   - [ ] `users`
-=======
-  - [ ] `users` (mit Rollen, Namen, etc.)
->>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
-  - [ ] `deliveries`
-  - [ ] `notes`
-  - [ ] `daily_tasks`
-  - [ ] `nice_to_know`
-  - [ ] `jokes`
-  - [ ] `bike_photos`
-  - [ ] `fotos` (mit client_name, bike, evtl. signature)
-- [ ] Beziehungen & Constraints definieren
-- [ ] Mockdaten einfügen zur Entwicklung
+  - [ ] `bikes`
+  - [ ] `requests`
+  - [ ] `request_bikes`
+  - [ ] `request_audit_log`
+- [ ] Indizes (z. B. pg_trgm für Bikes)
+- [ ] Seed-Daten: Zwei Shops, ein Admin, Beispiel-Bikes
 
 ## 5. 🛠 Funktionale Features – Kernmodule
 
 ### 5.1 📬 Delivery-System
 
-- [ ] Bike Delivery Anfrage erstellen:
-  - [ ] Von A nach B
-  - [ ] Bike, Datum, Dauer
-  - [ ] Status mit Checkbox (open → in progress → done)
-  - [ ] Erinnerung bei in progress
-<<<<<<< HEAD
-- [ ] Bike Delivery Übersicht: (wenn man auf die Seite geht)
-  - [ ] Anzeige von allen anstehenden Deliveries sortiert nach Shop.
-  - [ ] Wie ein Kalender. (Im PC Browser anders als auf dem Handy)
-=======
-  - [ ] Erinnerung bei "done", das Bike im System umzustellen (es wird automatisch eine Notes erstellt in dem jeweiligen Shop, die dann abgearbeitet werden kann)
->>>>>>> d90110ed59dae7b2c1591c62cec83107dc58cdff
+- [ ] Bike Delivery Anfrage erstellen (AddModal, FAB)
+- [ ] Accordion für Deliveries auf Home
+- [ ] Farblogik nach Fälligkeit
+- [ ] Statuswechsel mit ConfirmDialog
+- [ ] Editieren/Löschen direkt auf Home
+- [ ] Autosuggest für Bikes (Tags-Input)
+- [ ] Audit-Log für Statuswechsel
 
 ### 5.2 📝 Notes-System
 
 - [ ] Allgemeine Notizen (Material, Reparatur etc.)
-  - [ ] Checkbox: open, in progress, done
-  - [ ] Prioritäten: Low, Medium, High
-  - [ ] Creator/Editor System
-  - [ ] Antwortbereich (andersfarbig)
-  - [ ] 1 Tag nach "done" ins Archiv
-  - [ ] Archivfunktion für alte Einträge (für berechtigte User)
+- [ ] Checkbox: open, in progress, done
+- [ ] Prioritäten: Low, Medium, High
+- [ ] Creator/Editor System
+- [ ] Antwortbereich (andersfarbig)
+- [ ] Archivfunktion für alte Einträge
 
 ### 5.3 ✅ What else can be done
 
 - [ ] Tägliche/wiederkehrende Aufgaben
-  - [ ] Typen: Daily, 2nd Day, now and again, every X day
-  - [ ] Als erledigt markieren
-  - [ ] Wiederanzeige nach Intervall
+- [ ] Typen: Daily, 2nd Day, now and again, every X day
+- [ ] Als erledigt markieren
 
 ### 5.4 💡 Nice to know
 
@@ -106,7 +87,7 @@
 ### 5.5 😂 Witze & Memes
 
 - [ ] Täglich ein Witz/Meme auf Home anzeigen
-- [ ] User können eigene Beiträge hochladen (Text oder Bild)
+- [ ] User können eigene Beiträge hochladen
 
 ## 6. 🖼️ Upload- & Medienhandling
 
@@ -114,7 +95,7 @@
   - [ ] Upload-Funktion mit Bike-Zuordnung
   - [ ] Speicherung & Einsicht
 
-## 7. 🧑‍💼 Adminbereich (Wie profil, nur zusätzliche Funktionen)
+## 7. 🧑‍💼 Adminbereich
 
 - [ ] Benutzer anlegen mit Rollen
 - [ ] Übersicht & Verwaltung 
@@ -140,6 +121,32 @@
 
 - [ ] Umgebungen vorbereiten (Dev / Prod)
 - [ ] Deployment-Strategie:
+  - [ ] Frontend (z. B. Vercel oder eigener Server)
+  - [ ] Backend (z. B. Render, Railway, eigener VPS)
+  - [ ] PostgreSQL Datenbank (z. B. Supabase, ElephantSQL)
+- [ ] .env Setup mit Secrets
+
+## 11. 📖 Dokumentation
+
+- [ ] Developer-Doku (README, API-Routen, .env Beispiele)
+- [ ] User-Doku (Kurzanleitung für Mitarbeitende)
+- [ ] Änderungsprotokoll (Changelog.md)
+
+## 12. 🔄 Iterative Verbesserungen
+
+- [ ] UX-Feedback von Mitarbeitenden einholen
+- [ ] Features nachrüsten / verschlanken
+- [ ] Performanceoptimierung
+
+---
+
+**Siehe auch:**  
+- [docs/instructions.md](./instructions.md) für detaillierte technische Vorgaben und Sprint-Ziele.
+## 12. 🔄 Iterative Verbesserungen
+
+- [ ] UX-Feedback von Mitarbeitenden einholen
+- [ ] Features nachrüsten / verschlanken
+- [ ] Performanceoptimierung
   - [ ] Frontend (z. B. Vercel oder eigener Server)
   - [ ] Backend (z. B. Render, Railway, eigener VPS)
   - [ ] PostgreSQL Datenbank (z. B. Supabase, ElephantSQL)
