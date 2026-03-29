@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { fetchBikesInventory } from '../api/bikes.js';
+import { fetchBikesInventory, deleteBike } from '../api/bikes.js';
 import { updateAdminBike } from '../api/admin.js';
 
 export function useBikesInventory() {
@@ -8,6 +8,18 @@ export function useBikesInventory() {
     queryKey: ['bikes', 'inventory'],
     queryFn: fetchBikesInventory,
     staleTime: 30_000,
+  });
+}
+
+export function useDeleteBike() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => deleteBike(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bikes', 'inventory'] });
+      toast.success('Bike deleted');
+    },
+    onError: (err) => toast.error(err.message),
   });
 }
 

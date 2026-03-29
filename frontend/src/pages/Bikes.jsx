@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { MapPin, Wrench, ChevronDown, ChevronUp } from 'lucide-react';
-import { useBikesInventory, useMoveBike } from '../hooks/useBikes.js';
+import { MapPin, Wrench, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
+import { useBikesInventory, useMoveBike, useDeleteBike } from '../hooks/useBikes.js';
 import { useAdminShops } from '../hooks/useAdmin.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getShopMeta } from '../utils/shopColors.js';
+import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog.jsx';
 
 function BikeCard({ bike, shops, isAdmin }) {
-  const [moving, setMoving]   = useState(false);
-  const [shopId, setShopId]   = useState(bike.current_shop_id ?? '');
+  const [moving,  setMoving]  = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [shopId,  setShopId]  = useState(bike.current_shop_id ?? '');
   const moveMutation          = useMoveBike();
+  const deleteMutation        = useDeleteBike();
 
   async function save() {
     await moveMutation.mutateAsync({ id: bike.id, shop_id: shopId || null });
@@ -16,6 +19,7 @@ function BikeCard({ bike, shops, isAdmin }) {
   }
 
   return (
+    <>
     <div className="rounded-xl border bg-white overflow-hidden"
          style={{ borderColor: bike.is_active ? '#E5E7EB' : '#F3F4F6' }}>
       <div className="flex items-center justify-between px-4 py-3 gap-3">
@@ -39,16 +43,26 @@ function BikeCard({ bike, shops, isAdmin }) {
           </span>
         )}
 
-        {/* Admin move button */}
+        {/* Admin actions */}
         {isAdmin && (
-          <button
-            onClick={() => { setShopId(bike.current_shop_id ?? ''); setMoving(m => !m); }}
-            className="shrink-0 rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50 flex items-center gap-1"
-          >
-            <MapPin size={12} />
-            Move
-            {moving ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              onClick={() => { setShopId(bike.current_shop_id ?? ''); setMoving(m => !m); }}
+              className="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50 flex items-center gap-1"
+            >
+              <MapPin size={12} />
+              Move
+              {moving ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+            <button
+              onClick={() => setConfirm(true)}
+              disabled={deleteMutation.isPending}
+              className="rounded-lg border border-gray-200 p-1.5 text-gray-400 hover:text-red-500 hover:border-red-200 hover:bg-red-50 disabled:opacity-50 transition-colors"
+              aria-label="Delete bike"
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
         )}
       </div>
 
@@ -79,6 +93,17 @@ function BikeCard({ bike, shops, isAdmin }) {
         </div>
       )}
     </div>
+
+    <ConfirmDialog
+      open={confirm}
+      title="Delete bike?"
+      message={`Permanently delete ${bike.label}? This removes it from all delivery records too.`}
+      confirmLabel="Delete"
+      loading={deleteMutation.isPending}
+      onConfirm={async () => { await deleteMutation.mutateAsync(bike.id); setConfirm(false); }}
+      onCancel={() => setConfirm(false)}
+    />
+    </>
   );
 }
 

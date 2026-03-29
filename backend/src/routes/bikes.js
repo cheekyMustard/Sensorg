@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import pool from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -86,6 +86,15 @@ router.post('/', async (req, res, next) => {
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors });
     next(err);
   }
+});
+
+// DELETE /api/bikes/:id — admin only (cascades request_bikes)
+router.delete('/:id', requireRole('admin'), async (req, res, next) => {
+  try {
+    const { rowCount } = await pool.query('delete from bikes where id = $1', [req.params.id]);
+    if (!rowCount) return res.status(404).json({ error: 'Not found' });
+    res.status(204).end();
+  } catch (err) { next(err); }
 });
 
 export default router;
