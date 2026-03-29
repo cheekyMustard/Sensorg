@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Trash2, Pencil, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { useCompleteTask, useUncompleteTask, useUpdateTask, useDeleteTask } from '../../hooks/useTasks.js';
+import { useCompleteTask, useUncompleteTask, useUpdateTask, useDeleteTask, useApproveTask, useRejectTask } from '../../hooks/useTasks.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
 import { getShopMeta } from '../../utils/shopColors.js';
 
@@ -54,9 +54,15 @@ export default function TaskCard({ task }) {
   const [draft,      setDraft]      = useState({ title: task.title, description: task.description, recurrence: initialRecurrence });
   const [confirm,    setConfirm]    = useState(false);
 
-  const isCompleted = !!task.completion_id;
-  const canManage   = user?.roles?.some(r => ['admin', 'organiser'].includes(r));
-  const isPending   = completeMutation.isPending || uncompleteMutation.isPending;
+  const approveMutation = useApproveTask();
+  const rejectMutation  = useRejectTask();
+
+  const isCompleted     = !!task.completion_id;
+  const canManage       = user?.roles?.some(r => ['admin', 'organiser'].includes(r));
+  const isPending       = completeMutation.isPending || uncompleteMutation.isPending;
+  const approvalStatus  = task.approval_status ?? 'approved';
+  const isApprovalPending = approvalStatus === 'pending';
+  const isRejected      = approvalStatus === 'rejected';
 
   function toggleComplete() {
     if (isPending) return;
@@ -82,15 +88,22 @@ export default function TaskCard({ task }) {
         className="rounded-xl bg-white p-4 transition-colors"
         style={{
           boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-          border: isCompleted ? '1px solid #c8e6c9' : '1px solid #e8f0e8',
-          background: isCompleted ? '#f0faf0' : '#fff',
+          border: isRejected ? '1px solid #fca5a5'
+            : isApprovalPending ? '1px solid #fde68a'
+            : isCompleted ? '1px solid #c8e6c9'
+            : '1px solid #e8f0e8',
+          background: isRejected ? '#fff5f5'
+            : isApprovalPending ? '#fffbeb'
+            : isCompleted ? '#f0faf0'
+            : '#fff',
+          opacity: (isRejected || isApprovalPending) && !canManage ? 0.75 : 1,
         }}
       >
         <div className="flex items-start gap-3">
           {/* Checkbox */}
           <button
             onClick={toggleComplete}
-            disabled={isPending}
+            disabled={isPending || isApprovalPending || isRejected}
             aria-label={isCompleted ? 'Mark undone' : 'Mark done'}
             className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors disabled:opacity-50"
             style={{
@@ -172,6 +185,36 @@ export default function TaskCard({ task }) {
                   <p className="mt-1 text-xs" style={{ color: 'var(--brand-green)' }}>
                     ✓ {task.completed_by_username} · {formatTime(task.completed_at)}
                   </p>
+                )}
+                {isApprovalPending && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="rounded-full px-2 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-700">
+                      Pending approval
+                    </span>
+                    {canManage && (
+                      <>
+                        <button
+                          onClick={() => approveMutation.mutate(task.id)}
+                          disabled={approveMutation.isPending || rejectMutation.isPending}
+                          className="rounded-lg px-2 py-0.5 text-xs font-semibold text-white bg-green-500 hover:bg-green-600 disabled:opacity-50 transition-colors"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => rejectMutation.mutate(task.id)}
+                          disabled={approveMutation.isPending || rejectMutation.isPending}
+                          className="rounded-lg px-2 py-0.5 text-xs font-semibold text-white bg-red-400 hover:bg-red-500 disabled:opacity-50 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+                {isRejected && (
+                  <span className="mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-600">
+                    Rejected
+                  </span>
                 )}
               </>
             )}

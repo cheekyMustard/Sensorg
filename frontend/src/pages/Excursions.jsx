@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, X, Globe, ImageOff } from 'lucide-react';
-import { useExcursions, useCreateExcursion, useDeleteExcursion } from '../hooks/useExcursions.js';
+import ImageUploader from '../components/ImageUploader/ImageUploader.jsx';
+import { useExcursions, useCreateExcursion, useDeleteExcursion, useApproveExcursion, useRejectExcursion } from '../hooks/useExcursions.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useShops } from '../hooks/useRequests.js';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog.jsx';
@@ -19,6 +20,8 @@ function companyColor(name) {
 }
 
 const KNOWN_COMPANIES = ['LCT', 'First Minute', 'Lanzabuggy', 'Paracraft'];
+
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
 const inputCls = 'rounded-lg border px-3 py-2 text-sm outline-none transition-shadow w-full bg-white';
 const inputStyle = { borderColor: '#D1D5DB' };
@@ -114,17 +117,8 @@ function AddForm({ onClose }) {
             />
           </div>
 
-          {/* Image URL */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-600">Image URL <span className="font-normal text-gray-400">(optional)</span></label>
-            <input
-              type="url"
-              value={form.image_url}
-              onChange={e => set('image_url', e.target.value)}
-              placeholder="https://…"
-              className={inputCls} style={inputStyle} onFocus={onFocus} onBlur={onBlur}
-            />
-          </div>
+          {/* Image */}
+          <ImageUploader value={form.image_url || null} onChange={url => set('image_url', url ?? '')} />
 
           {/* Shop scope */}
           <div className="flex flex-col gap-1">
@@ -165,23 +159,35 @@ function AddForm({ onClose }) {
 
 // ── Single entry card ───────────────────────────────────────────────────────
 function ExcursionCard({ entry }) {
-  const { user }       = useAuth();
-  const deleteMutation = useDeleteExcursion();
-  const [confirm, setConfirm] = useState(false);
+  const { user }          = useAuth();
+  const deleteMutation    = useDeleteExcursion();
+  const approveMutation   = useApproveExcursion();
+  const rejectMutation    = useRejectExcursion();
+  const [confirm, setConfirm]   = useState(false);
   const [imgError, setImgError] = useState(false);
 
-  const colors    = companyColor(entry.company);
-  const canDelete = user?.roles?.includes('admin') || entry.created_by_user_id === user?.id;
+  const colors            = companyColor(entry.company);
+  const canDelete         = user?.roles?.includes('admin') || entry.created_by_user_id === user?.id;
+  const canApprove        = user?.roles?.some(r => ['admin', 'organiser'].includes(r));
+  const approvalStatus    = entry.approval_status ?? 'approved';
+  const isApprovalPending = approvalStatus === 'pending';
+  const isRejected        = approvalStatus === 'rejected';
 
   return (
     <>
-      <div className="rounded-xl bg-white overflow-hidden shadow-sm border border-gray-100"
-           style={{ borderLeft: `4px solid ${colors.primary}` }}>
+      <div
+        className="rounded-xl bg-white overflow-hidden shadow-sm"
+        style={{
+          borderLeft: `4px solid ${isRejected ? '#f87171' : isApprovalPending ? '#fbbf24' : colors.primary}`,
+          border: isRejected ? '1px solid #fca5a5' : isApprovalPending ? '1px solid #fde68a' : '1px solid #f3f4f6',
+          opacity: (isRejected || isApprovalPending) && !canApprove ? 0.75 : 1,
+        }}
+      >
 
         {/* Image */}
         {entry.image_url && !imgError && (
           <img
-            src={entry.image_url}
+            src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
             alt={entry.topic}
             className="w-full max-h-48 object-cover"
             onError={() => setImgError(true)}
@@ -200,6 +206,33 @@ function ExcursionCard({ entry }) {
           {/* Note */}
           {entry.note && (
             <p className="mt-1.5 whitespace-pre-wrap text-sm text-gray-600">{entry.note}</p>
+          )}
+
+          {/* Approval status + actions */}
+          {(isApprovalPending || isRejected) && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${isRejected ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-700'}`}>
+                {isRejected ? 'Rejected' : 'Pending approval'}
+              </span>
+              {canApprove && isApprovalPending && (
+                <>
+                  <button
+                    onClick={() => approveMutation.mutate(entry.id)}
+                    disabled={approveMutation.isPending || rejectMutation.isPending}
+                    className="rounded-lg px-2 py-0.5 text-xs font-semibold text-white bg-green-500 hover:bg-green-600 disabled:opacity-50 transition-colors"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => rejectMutation.mutate(entry.id)}
+                    disabled={approveMutation.isPending || rejectMutation.isPending}
+                    className="rounded-lg px-2 py-0.5 text-xs font-semibold text-white bg-red-400 hover:bg-red-500 disabled:opacity-50 transition-colors"
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
+            </div>
           )}
 
           {/* Footer */}

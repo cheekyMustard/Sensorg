@@ -1,8 +1,25 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Pencil, Trash2, ImageOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useUpdateKb, useDeleteKb } from '../../hooks/useKb.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
+import ImageUploader from '../ImageUploader/ImageUploader.jsx';
+
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
+function KbImage({ url, alt }) {
+  const [err, setErr] = useState(false);
+  const src = url.startsWith('/uploads/') ? `${API_BASE}${url}` : url;
+  if (err) return (
+    <div className="mb-2 flex items-center justify-center gap-1 rounded-lg bg-stone-100 py-3 text-xs text-stone-400">
+      <ImageOff size={13} /> Image unavailable
+    </div>
+  );
+  return (
+    <img src={src} alt={alt} onError={() => setErr(true)}
+      className="mb-2 w-full rounded-lg object-cover" style={{ maxHeight: 200 }} />
+  );
+}
 
 const inputCls = 'rounded-lg border px-2 py-1 text-sm outline-none transition-shadow w-full';
 const inputStyle = { borderColor: '#d0e8ee' };
@@ -16,7 +33,7 @@ export default function KbCard({ article }) {
 
   const [expanded, setExpanded] = useState(false);
   const [editing,  setEditing]  = useState(false);
-  const [draft,    setDraft]    = useState({ title: article.title, content: article.content, category: article.category ?? '' });
+  const [draft,    setDraft]    = useState({ title: article.title, content: article.content, category: article.category ?? '', image_url: article.image_url ?? null });
   const [confirm,  setConfirm]  = useState(false);
 
   const canManage = user?.roles?.some(r => ['admin', 'organiser', 'mechanic'].includes(r));
@@ -26,14 +43,14 @@ export default function KbCard({ article }) {
   async function saveEdit() {
     await updateMutation.mutateAsync({
       id: article.id,
-      data: { title: draft.title, content: draft.content, category: draft.category || null },
+      data: { title: draft.title, content: draft.content, category: draft.category || null, image_url: draft.image_url ?? null },
     });
     setEditing(false);
   }
 
   function cancelEdit() {
     setEditing(false);
-    setDraft({ title: article.title, content: article.content, category: article.category ?? '' });
+    setDraft({ title: article.title, content: article.content, category: article.category ?? '', image_url: article.image_url ?? null });
   }
 
   return (
@@ -106,9 +123,13 @@ export default function KbCard({ article }) {
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-medium text-stone-500">Content</label>
                   <textarea value={draft.content} onChange={e => set('content', e.target.value)}
-                    rows={6}
+                    rows={5}
                     className={`${inputCls} resize-none`} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
                 </div>
+                <ImageUploader
+                  value={draft.image_url}
+                  onChange={url => set('image_url', url)}
+                />
                 {updateMutation.error && (
                   <p className="text-xs text-red-600">{updateMutation.error.message}</p>
                 )}
@@ -130,6 +151,9 @@ export default function KbCard({ article }) {
               </div>
             ) : (
               <div>
+                {article.image_url && (
+                  <KbImage url={article.image_url} alt={article.title} />
+                )}
                 {article.content ? (
                   <p className="text-sm text-stone-700 whitespace-pre-wrap leading-relaxed">{article.content}</p>
                 ) : (

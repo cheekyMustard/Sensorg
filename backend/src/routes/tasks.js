@@ -47,12 +47,17 @@ router.get('/', async (req, res, next) => {
     const isPrivileged = hasRole(req.user, 'admin', 'organiser');
     const shopId = req.user.shop_id;
 
+    // Approval visibility: approved always visible; pending/rejected only for approvers or creator
+    const approvalClause = isPrivileged
+      ? ''
+      : `and (t.approval_status = 'approved' or t.created_by_user_id = '${req.user.id}')`;
+
     let where, params;
     if (isPrivileged && !shopId) {
-      where  = 't.is_active = true';
+      where  = `t.is_active = true ${approvalClause}`;
       params = [];
     } else {
-      where  = 't.is_active = true and (t.shop_id = $1 or t.shop_id is null)';
+      where  = `t.is_active = true and (t.shop_id = $1 or t.shop_id is null) ${approvalClause}`;
       params = [shopId];
     }
 
@@ -87,6 +92,7 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
   try {
     const data    = createSchema.parse(req.body);
     const shopIds = data.shop_ids?.length ? data.shop_ids : [null];
+    const approvalStatus = hasRole(req.user, 'admin', 'organiser') ? 'approved' : 'pending';
 
     const client = await pool.connect();
     try {
@@ -94,9 +100,9 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
       const created = [];
       for (const shopId of shopIds) {
         const { rows } = await client.query(
-          `insert into tasks (shop_id, title, description, recurrence_unit, recurrence_interval, created_by_user_id)
-           values ($1, $2, $3, $4, $5, $6) returning *`,
-          [shopId, data.title, data.description, data.recurrence_unit, data.recurrence_interval, req.user.id]
+          `insert into tasks (shop_id, title, description, recurrence_unit, recurrence_interval, approval_status, created_by_user_id)
+           values ($1, $2, $3, $4, $5, $6, $7) returning *`,
+          [shopId, data.title, data.description, data.recurrence_unit, data.recurrence_interval, approvalStatus, req.user.id]
         );
         created.push(rows[0]);
       }
@@ -147,6 +153,30 @@ router.delete('/:id', requireRole('admin', 'organiser'), async (req, res, next) 
     const { rowCount } = await pool.query('delete from tasks where id = $1', [req.params.id]);
     if (!rowCount) return res.status(404).json({ error: 'Not found' });
     res.status(204).end();
+  } catch (err) { next(err); }
+});
+
+// POST /api/tasks/:id/approve — admin, organiser
+router.post('/:id/approve', requireRole('admin', 'organiser'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `update tasks set approval_status = 'approved', updated_at = now() where id = $1 returning *`,
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
+});
+
+// POST /api/tasks/:id/reject — admin, organiser
+router.post('/:id/reject', requireRole('admin', 'organiser'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `update tasks set approval_status = 'rejected', updated_at = now() where id = $1 returning *`,
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
   } catch (err) { next(err); }
 });
 

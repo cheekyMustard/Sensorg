@@ -7,6 +7,7 @@ import { useCreateNote } from '../../hooks/useNotes.js';
 import { useCreateTask } from '../../hooks/useTasks.js';
 import { useCreateKb } from '../../hooks/useKb.js';
 import BikeTagsInput from '../BikeTagsInput/BikeTagsInput.jsx';
+import ImageUploader from '../ImageUploader/ImageUploader.jsx';
 
 const inputCls = 'rounded-lg border px-3 py-2 text-sm outline-none transition-shadow w-full';
 const inputStyle = { borderColor: 'var(--brand-border)' };
@@ -322,13 +323,18 @@ function TaskForm({ onClose }) {
 
 function KbForm({ onClose }) {
   const createMutation = useCreateKb();
-  const [form, setForm] = useState({ title: '', content: '', category: '' });
+  const [form, setForm] = useState({ title: '', content: '', category: '', image_url: null });
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await createMutation.mutateAsync({ title: form.title, content: form.content, category: form.category || null });
+    await createMutation.mutateAsync({
+      title:     form.title,
+      content:   form.content,
+      category:  form.category || null,
+      image_url: form.image_url || null,
+    });
     onClose();
   }
 
@@ -356,9 +362,11 @@ function KbForm({ onClose }) {
       <div className="flex flex-col gap-1">
         <Label>Content <span className="font-normal text-stone-400">(optional)</span></Label>
         <textarea value={form.content} onChange={e => set('content', e.target.value)}
-          rows={5} placeholder="Write the article content…"
+          rows={4} placeholder="Write the article content…"
           className={`${inputCls} resize-none`} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />
       </div>
+
+      <ImageUploader value={form.image_url} onChange={url => set('image_url', url)} />
 
       {createMutation.error && (
         <p className="text-xs text-red-600">{createMutation.error.message}</p>

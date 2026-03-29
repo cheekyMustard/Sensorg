@@ -43,6 +43,15 @@ router.get('/', async (req, res, next) => {
 
     const where = conditions.join(' and ');
 
+    // Approval visibility: approved always; pending/rejected only for approvers or creator
+    const isPrivileged = hasRole(req.user, 'admin', 'organiser');
+    if (!isPrivileged) {
+      params.push(req.user.id);
+      conditions.push(`(e.approval_status = 'approved' or e.created_by_user_id = $${params.length})`);
+    }
+
+    const where2 = conditions.join(' and ');
+
     const { rows } = await pool.query(`
       select e.*,
              u.username  as author,
@@ -50,7 +59,7 @@ router.get('/', async (req, res, next) => {
         from excursions e
         left join users u on u.id = e.created_by_user_id
         left join shops s on s.id = e.shop_id
-       where ${where}
+       where ${where2}
        order by e.company asc, e.created_at desc
     `, params);
 
@@ -68,17 +77,43 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
       shopId = req.user.shop_id ?? null;
     }
 
+    const approvalStatus = hasRole(req.user, 'admin', 'organiser') ? 'approved' : 'pending';
+
     const { rows } = await pool.query(
-      `insert into excursions (company, topic, note, image_url, shop_id, created_by_user_id)
-       values ($1, $2, $3, $4, $5, $6)
+      `insert into excursions (company, topic, note, image_url, shop_id, approval_status, created_by_user_id)
+       values ($1, $2, $3, $4, $5, $6, $7)
        returning *`,
-      [data.company, data.topic, data.note ?? null, data.image_url || null, shopId, req.user.id]
+      [data.company, data.topic, data.note ?? null, data.image_url || null, shopId, approvalStatus, req.user.id]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors });
     next(err);
   }
+});
+
+// POST /api/excursions/:id/approve — admin, organiser
+router.post('/:id/approve', requireRole('admin', 'organiser'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `update excursions set approval_status = 'approved', updated_at = now() where id = $1 returning *`,
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
+});
+
+// POST /api/excursions/:id/reject — admin, organiser
+router.post('/:id/reject', requireRole('admin', 'organiser'), async (req, res, next) => {
+  try {
+    const { rows } = await pool.query(
+      `update excursions set approval_status = 'rejected', updated_at = now() where id = $1 returning *`,
+      [req.params.id]
+    );
+    if (!rows[0]) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (err) { next(err); }
 });
 
 // DELETE /api/excursions/:id — admin or creator only

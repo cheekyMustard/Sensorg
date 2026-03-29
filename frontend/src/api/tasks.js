@@ -6,3 +6,5 @@ export const updateTask      = (id, data) => api.patch(`/api/tasks/${id}`, data)
 export const deleteTask      = (id)       => api.delete(`/api/tasks/${id}`);
 export const completeTask    = (id)       => api.post(`/api/tasks/${id}/complete`, {});
 export const uncompleteTask  = (id)       => api.delete(`/api/tasks/${id}/complete`);
+export const approveTask     = (id)       => api.post(`/api/tasks/${id}/approve`, {});
+export const rejectTask      = (id)       => api.post(`/api/tasks/${id}/reject`, {});

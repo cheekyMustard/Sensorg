@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { fetchTasks, createTask, updateTask, deleteTask, completeTask, uncompleteTask } from '../api/tasks.js';
+import { fetchTasks, createTask, updateTask, deleteTask, completeTask, uncompleteTask, approveTask, rejectTask } from '../api/tasks.js';
 
 export function useTasks() {
   return useQuery({ queryKey: ['tasks'], queryFn: fetchTasks });
@@ -51,6 +51,24 @@ export function useUncompleteTask() {
   return useMutation({
     mutationFn: (id) => uncompleteTask(id),
     onSuccess:  () => qc.invalidateQueries({ queryKey: ['tasks'] }),
+    onError:    (err) => toast.error(err.message),
+  });
+}
+
+export function useApproveTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => approveTask(id),
+    onSuccess:  () => { qc.invalidateQueries({ queryKey: ['tasks'] }); toast.success('Task approved'); },
+    onError:    (err) => toast.error(err.message),
+  });
+}
+
+export function useRejectTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => rejectTask(id),
+    onSuccess:  () => { qc.invalidateQueries({ queryKey: ['tasks'] }); toast.success('Task rejected'); },
     onError:    (err) => toast.error(err.message),
   });
 }

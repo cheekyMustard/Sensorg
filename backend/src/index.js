@@ -16,6 +16,7 @@ import kbRouter    from './routes/kb.js';
 import usersRouter     from './routes/users.js';
 import excursionsRouter    from './routes/excursions.js';
 import repairRequestsRouter from './routes/repair_requests.js';
+import uploadsRouter        from './routes/uploads.js';
 
 const app = express();
 
@@ -34,6 +35,11 @@ app.use('/api/kb',    kbRouter);
 app.use('/api/users',      usersRouter);
 app.use('/api/excursions',      excursionsRouter);
 app.use('/api/repair-requests', repairRequestsRouter);
+app.use('/api/uploads',         uploadsRouter);
+
+// Serve uploaded files
+const __uploadsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../uploads');
+app.use('/uploads', express.static(__uploadsDir));
 
 app.use((err, _req, res, _next) => {
   console.error(err);

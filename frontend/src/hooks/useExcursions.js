@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { fetchExcursions, createExcursion, deleteExcursion } from '../api/excursions.js';
+import { fetchExcursions, createExcursion, deleteExcursion, approveExcursion, rejectExcursion } from '../api/excursions.js';
 
 export function useExcursions(company = null) {
   return useQuery({
@@ -31,5 +31,23 @@ export function useDeleteExcursion() {
       toast.success('Entry deleted');
     },
     onError: (err) => toast.error(err.message),
+  });
+}
+
+export function useApproveExcursion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: approveExcursion,
+    onSuccess:  () => { qc.invalidateQueries({ queryKey: ['excursions'] }); toast.success('Entry approved'); },
+    onError:    (err) => toast.error(err.message),
+  });
+}
+
+export function useRejectExcursion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: rejectExcursion,
+    onSuccess:  () => { qc.invalidateQueries({ queryKey: ['excursions'] }); toast.success('Entry rejected'); },
+    onError:    (err) => toast.error(err.message),
   });
 }

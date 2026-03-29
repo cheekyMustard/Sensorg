@@ -9,17 +9,19 @@ const router = Router();
 router.use(requireAuth);
 
 const createSchema = z.object({
-  title:    z.string().min(1).max(200),
-  content:  z.string().default(''),
-  category: z.string().max(100).nullable().optional(),
-  shop_id:  z.string().uuid().nullable().optional(),
+  title:     z.string().min(1).max(200),
+  content:   z.string().default(''),
+  category:  z.string().max(100).nullable().optional(),
+  shop_id:   z.string().uuid().nullable().optional(),
+  image_url: z.string().max(1000).nullable().optional(),
 });
 
 const patchSchema = z.object({
-  title:    z.string().min(1).max(200).optional(),
-  content:  z.string().optional(),
-  category: z.string().max(100).nullable().optional(),
+  title:     z.string().min(1).max(200).optional(),
+  content:   z.string().optional(),
+  category:  z.string().max(100).nullable().optional(),
   is_active: z.boolean().optional(),
+  image_url: z.string().max(1000).nullable().optional(),
 });
 
 // GET /api/kb — admin/organiser/mechanic see all; others see own shop + global
@@ -62,10 +64,10 @@ router.post('/', requireRole('admin', 'organiser', 'mechanic'), async (req, res,
       : req.user.shop_id;
 
     const { rows } = await pool.query(
-      `insert into kb_articles (shop_id, title, content, category, created_by_user_id, updated_by_user_id)
-       values ($1, $2, $3, $4, $5, $5)
+      `insert into kb_articles (shop_id, title, content, category, image_url, created_by_user_id, updated_by_user_id)
+       values ($1, $2, $3, $4, $5, $6, $6)
        returning *`,
-      [shopId, data.title, data.content, data.category ?? null, req.user.id]
+      [shopId, data.title, data.content, data.category ?? null, data.image_url ?? null, req.user.id]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -87,6 +89,7 @@ router.patch('/:id', requireRole('admin', 'organiser', 'mechanic'), async (req, 
     if (data.content   !== undefined) add('content',   data.content);
     if (data.category  !== undefined) add('category',  data.category);
     if (data.is_active !== undefined) add('is_active', data.is_active);
+    if (data.image_url !== undefined) add('image_url', data.image_url);
     if (!fields.length) return res.status(400).json({ error: 'Nothing to update' });
     add('updated_by_user_id', req.user.id);
     add('updated_at', new Date());

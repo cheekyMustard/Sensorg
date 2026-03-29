@@ -178,6 +178,27 @@ router.post('/', async (req, res, next) => {
     await attachBikes(client, request.id, bikeIds);
     await auditLog(client, request.id, 'created', null, req.user.id);
 
+    // Notify all drivers and admins about the new delivery
+    const { rows: shopRows } = await client.query(
+      'select fs.name as from_name, ts.name as to_name from shops fs, shops ts where fs.id = $1 and ts.id = $2',
+      [data.from_shop_id, data.to_shop_id]
+    );
+    const { from_name, to_name } = shopRows[0];
+    const reasonLabel = { rental: 'Rental', repair: 'Repair', return: 'Return' }[data.reason] ?? data.reason;
+    const bikeCount   = bikeIds.length;
+
+    const { rows: driverRows } = await client.query(
+      `select id from users where roles && array['driver','admin']::text[] and is_active = true`
+    );
+    const notifyIds = driverRows.map(r => r.id).filter(id => id !== req.user.id);
+
+    if (notifyIds.length) {
+      await sendPushToUsers(client, notifyIds, {
+        title: `🚲 New delivery: ${from_name} → ${to_name}`,
+        body:  `${reasonLabel} · ${bikeCount} bike${bikeCount !== 1 ? 's' : ''}`,
+      });
+    }
+
     await client.query('commit');
     res.status(201).json(request);
   } catch (err) {
