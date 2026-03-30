@@ -1,5 +1,5 @@
 import { useAuth } from '../context/AuthContext.jsx';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { usePush } from '../hooks/usePush.js';
 import { useRequests, useBrmToggle } from '../hooks/useRequests.js';
 import { useUsers } from '../hooks/useUsers.js';
@@ -153,14 +153,8 @@ function TeamOverview() {
 }
 
 export default function Profile() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const { supported, permission, subscribed, loading, subscribe, unsubscribe } = usePush();
-
-  function handleLogout() {
-    logout();
-    navigate('/login', { replace: true });
-  }
 
   return (
     <main className="flex-1 px-4 py-4 pb-(--bottom-nav-height)">
@@ -220,12 +214,6 @@ export default function Profile() {
         </Link>
       )}
 
-      <button
-        onClick={handleLogout}
-        className="mt-4 rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
-      >
-        Sign out
-      </button>
     </main>
   );
 }

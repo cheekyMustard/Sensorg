@@ -1,9 +1,17 @@
 import { useAuth } from '../../context/AuthContext.jsx';
 import { getShopMeta } from '../../utils/shopColors.js';
+import { useNavigate } from 'react-router-dom';
+import { LogOut } from 'lucide-react';
 
 export default function TopBar() {
-  const { user, activeShop } = useAuth();
+  const { user, activeShop, logout } = useAuth();
   const shopMeta = activeShop ? getShopMeta(activeShop.name) : null;
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    logout();
+    navigate('/login', { replace: true });
+  }
 
   return (
     <header
@@ -22,7 +30,7 @@ export default function TopBar() {
         <span className="text-sm text-gray-500">—</span>
       )}
 
-      {/* User info */}
+      {/* User info + logout */}
       {user && (
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-white">{user.username}</span>
@@ -36,6 +44,13 @@ export default function TopBar() {
           >
             {(user.roles ?? []).join(', ')}
           </span>
+          <button
+            onClick={handleLogout}
+            className="ml-1 rounded-lg p-1.5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+            title="Sign out"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       )}
     </header>
