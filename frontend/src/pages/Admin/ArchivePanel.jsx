@@ -47,7 +47,9 @@ function DeliveryRow({ r }) {
       <p className="mt-0.5 text-xs text-gray-400">
         {r.reason} · {bikes}
       </p>
-      <p className="mt-0.5 text-xs text-gray-400">{formatDate(r.updated_at)}</p>
+      <p className="mt-0.5 text-xs text-gray-400">
+        {r.author ? `by ${r.author} · ` : ''}{formatDate(r.updated_at)}
+      </p>
     </div>
   );
 }
@@ -79,7 +81,9 @@ function TaskRow({ t }) {
         )}
       </div>
       {t.description && <p className="mt-0.5 text-xs text-gray-500 line-clamp-2">{t.description}</p>}
-      <p className="mt-0.5 text-xs text-gray-400">completed {formatDate(t.updated_at)}</p>
+      <p className="mt-0.5 text-xs text-gray-400">
+        {t.author ? `by ${t.author} · ` : ''}completed {formatDate(t.updated_at)}
+      </p>
     </div>
   );
 }

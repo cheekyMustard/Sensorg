@@ -212,16 +212,17 @@ router.get('/archive', async (_req, res, next) => {
       pool.query(`
         select r.id, r.reason, r.status, r.date_rental, r.note,
                fs.name as from_shop_name, ts.name as to_shop_name,
-               r.updated_at,
+               r.updated_at, u.username as author,
                json_agg(json_build_object('label', b.label) order by rb.position)
                  filter (where b.id is not null) as bikes
           from requests r
           join shops fs on fs.id = r.from_shop_id
           join shops ts on ts.id = r.to_shop_id
+          left join users u on u.id = r.created_by_user_id
           left join request_bikes rb on rb.request_id = r.id
           left join bikes b on b.id = rb.bike_id
          where r.status in ('done', 'cancelled')
-         group by r.id, fs.name, ts.name
+         group by r.id, fs.name, ts.name, u.username
          order by r.updated_at desc
          limit 200
       `),
@@ -237,9 +238,10 @@ router.get('/archive', async (_req, res, next) => {
       `),
       pool.query(`
         select t.id, t.title, t.description, t.shop_id, t.updated_at,
-               s.name as shop_name
+               s.name as shop_name, u.username as author
           from tasks t
           left join shops s on s.id = t.shop_id
+          left join users u on u.id = t.created_by_user_id
          where t.is_one_time = true and t.is_active = false
          order by t.updated_at desc
          limit 200
