@@ -58,7 +58,10 @@ app.use('/api/uploads',         uploadsRouter);
 
 // Serve uploaded files
 const __uploadsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../uploads');
-app.use('/uploads', express.static(__uploadsDir));
+app.use('/uploads', (_req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  next();
+}, express.static(__uploadsDir));
 
 app.use((err, _req, res, _next) => {
   console.error(err);
