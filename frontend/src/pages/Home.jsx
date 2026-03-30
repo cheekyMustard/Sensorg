@@ -10,6 +10,7 @@ import NotesSection from '../components/NotesSection/NotesSection.jsx';
 import TasksSection from '../components/TasksSection/TasksSection.jsx';
 import KbSection from '../components/KbSection/KbSection.jsx';
 import RepairRequestsSection from '../components/RepairRequestsSection/RepairRequestsSection.jsx';
+import JokesSection from '../components/JokesSection/JokesSection.jsx';
 import AddModal from '../components/AddModal/AddModal.jsx';
 
 export default function Home() {
@@ -69,6 +70,10 @@ export default function Home() {
           articles={articles} loading={kbLoading} error={kbError}
           isOpen={openSection === 'kb'} onToggle={() => toggle('kb')}
           onAdd={() => setAddMode('kb')}
+        />
+        <JokesSection
+          isOpen={openSection === 'jokes'}
+          onToggle={() => toggle('jokes')}
         />
       </main>
 

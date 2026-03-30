@@ -18,6 +18,7 @@ import usersRouter     from './routes/users.js';
 import excursionsRouter    from './routes/excursions.js';
 import repairRequestsRouter from './routes/repair_requests.js';
 import uploadsRouter        from './routes/uploads.js';
+import jokesRouter          from './routes/jokes.js';
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.use('/api/users',      usersRouter);
 app.use('/api/excursions',      excursionsRouter);
 app.use('/api/repair-requests', repairRequestsRouter);
 app.use('/api/uploads',         uploadsRouter);
+app.use('/api/jokes',           jokesRouter);
 
 // Serve uploaded files
 const __uploadsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '../uploads');
