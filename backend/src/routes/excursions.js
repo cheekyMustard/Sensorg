@@ -13,7 +13,7 @@ const createSchema = z.object({
   company:   z.string().min(1).max(100),
   topic:     z.string().min(1).max(200),
   note:      z.string().max(2000).optional(),
-  image_url: z.string().url().max(1000).optional().or(z.literal('')),
+  image_url: z.string().max(1000).optional().or(z.literal('')),
   shop_id:   z.string().uuid().nullable().optional(),
 });
 
