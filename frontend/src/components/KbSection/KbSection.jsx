@@ -38,7 +38,7 @@ export default function KbSection({ articles = [], loading, error, isOpen, onTog
               </span>
             )}
           </span>
-          {user?.roles?.some(r => ['admin', 'organiser', 'mechanic'].includes(r)) && (
+          {['admin', 'organiser', 'mechanic'].some(r => user?.roles?.includes(r)) && (
             <button
               onClick={e => { e.stopPropagation(); onAdd(); }}
               aria-label="Add article"

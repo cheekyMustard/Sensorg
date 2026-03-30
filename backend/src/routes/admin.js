@@ -8,6 +8,7 @@ const router = Router();
 
 router.use(requireAuth, requireRole('admin'));
 
+// Keep in sync with: frontend/src/pages/Admin/UsersPanel.jsx and db/migrations/015_multi_role.sql
 const ROLES = ['admin', 'driver', 'mechanic', 'cleaner', 'organiser', 'general'];
 
 // ── Users ───────────────────────────────────────────────────────────────────

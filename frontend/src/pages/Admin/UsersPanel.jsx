@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { UserPlus, ChevronDown, Trash2 } from 'lucide-react';
-import { useAdminUsers, useCreateAdminUser, useUpdateAdminUser, useDeleteAdminUser } from '../../hooks/useAdmin.js';
-import { useAdminShops } from '../../hooks/useAdmin.js';
+import { useAdminUsers, useCreateAdminUser, useUpdateAdminUser, useDeleteAdminUser, useAdminShops } from '../../hooks/useAdmin.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import ConfirmDialog from '../../components/ConfirmDialog/ConfirmDialog.jsx';
 
+// Keep in sync with: backend/src/routes/admin.js and db/migrations/015_multi_role.sql
 const ROLES = ['admin', 'driver', 'mechanic', 'cleaner', 'organiser', 'general'];
 
 function RolesSelector({ value, onChange }) {

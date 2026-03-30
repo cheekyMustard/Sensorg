@@ -4,6 +4,7 @@ import { api } from './client.js';
 export const fetchAdminUsers   = ()           => api.get('/api/admin/users');
 export const createAdminUser   = (data)        => api.post('/api/admin/users', data);
 export const updateAdminUser   = (id, data)    => api.patch(`/api/admin/users/${id}`, data);
+export const deleteAdminUser   = (id)          => api.delete(`/api/admin/users/${id}`);
 
 // Shops
 export const fetchAdminShops   = ()           => api.get('/api/admin/shops');
@@ -13,4 +14,6 @@ export const updateAdminShop   = (id, data)    => api.patch(`/api/admin/shops/${
 // Bikes
 export const fetchAdminBikes   = ()           => api.get('/api/admin/bikes');
 export const updateAdminBike   = (id, data)    => api.patch(`/api/admin/bikes/${id}`, data);
-export const deleteAdminUser   = (id)          => api.delete(`/api/admin/users/${id}`);
+
+// Archive
+export const fetchArchive      = ()            => api.get('/api/admin/archive');

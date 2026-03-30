@@ -57,9 +57,9 @@ const managerId   = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 const shopId      = 'dddddddd-dddd-dddd-dddd-dddddddddddd';
 const requestId   = 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee';
 
-const tokenShopUser = makeToken({ id: shopUserId, role: 'shopUser', shop_id: shopId });
-const tokenDriver   = makeToken({ id: driverId,   role: 'driver',   shop_id: shopId });
-const tokenManager  = makeToken({ id: managerId,  role: 'manager',  shop_id: shopId });
+const tokenShopUser = makeToken({ id: shopUserId, roles: ['shopUser'], shop_id: shopId });
+const tokenDriver   = makeToken({ id: driverId,   roles: ['driver'],   shop_id: shopId });
+const tokenManager  = makeToken({ id: managerId,  roles: ['manager', 'organiser'],  shop_id: shopId });
 
 /** Build a fake request row as returned by the DB */
 function fakeRequest(overrides = {}) {

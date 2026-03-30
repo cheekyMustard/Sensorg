@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { X, Bike, StickyNote, ListChecks, BookOpen } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { useCreateRequest, useShops } from '../../hooks/useRequests.js';
+import { useCreateRequest } from '../../hooks/useRequests.js';
+import { useShops } from '../../hooks/useShops.js';
 import { SHOP_META } from '../../utils/shopColors.js';
 import { useCreateNote } from '../../hooks/useNotes.js';
 import { useCreateTask } from '../../hooks/useTasks.js';
 import { useCreateKb } from '../../hooks/useKb.js';
 import BikeTagsInput from '../BikeTagsInput/BikeTagsInput.jsx';
 import ImageUploader from '../ImageUploader/ImageUploader.jsx';
+import { RECURRENCE_OPTIONS, parseRecurrenceKey } from '../../utils/recurrence.js';
 
 const inputCls = 'rounded-lg border px-3 py-2 text-sm outline-none transition-shadow w-full';
 const inputStyle = { borderColor: 'var(--brand-border)' };
@@ -190,21 +192,6 @@ function NoteForm({ onClose }) {
   );
 }
 
-const RECURRENCE_OPTIONS = [
-  { value: 'day:1',   label: 'Every day' },
-  { value: 'day:2',   label: 'Every 2 days' },
-  { value: 'day:3',   label: 'Every 3 days' },
-  { value: 'day:4',   label: 'Every 4 days' },
-  { value: 'day:5',   label: 'Every 5 days' },
-  { value: 'day:6',   label: 'Every 6 days' },
-  { value: 'week:1',  label: 'Every week' },
-  { value: 'month:1', label: 'Every month' },
-];
-
-function parseRecurrence(value) {
-  const [unit, interval] = value.split(':');
-  return { recurrence_unit: unit, recurrence_interval: Number(interval) };
-}
 
 function TaskForm({ onClose }) {
   const { activeShop } = useAuth();
@@ -232,7 +219,7 @@ function TaskForm({ onClose }) {
       title:       form.title,
       description: form.description,
       shop_ids:    selectedShopIds, // [] = global
-      ...parseRecurrence(form.recurrence),
+      ...parseRecurrenceKey(form.recurrence),
     });
     onClose();
   }

@@ -4,8 +4,7 @@ import { useJokes, useJokeCategories, useCreateJoke, useDeleteJoke } from '../..
 import { useAuth } from '../../context/AuthContext.jsx';
 import ImageUploader from '../ImageUploader/ImageUploader.jsx';
 import ImageLightbox from '../ImageLightbox/ImageLightbox.jsx';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { resolveUploadUrl } from '../../utils/resolveUploadUrl.js';
 
 // ── Seen tracking via localStorage ─────────────────────────────────────────
 function loadSeen() {
@@ -17,10 +16,6 @@ function saveSeen(set) {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-function resolveImg(url) {
-  if (!url) return null;
-  return url.startsWith('/uploads/') ? `${API_BASE}${url}` : url;
-}
 
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -125,7 +120,7 @@ function JokeCard({ joke, seen, onSeen }) {
   const [lightbox,  setLightbox]  = useState(false);
   const [imgError,  setImgError]  = useState(false);
 
-  const imgSrc   = resolveImg(joke.image_url);
+  const imgSrc   = resolveUploadUrl(joke.image_url);
   const canDelete = user?.id === joke.created_by_user_id || user?.roles?.includes('admin');
 
   function handleClick() {

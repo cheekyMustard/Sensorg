@@ -33,7 +33,7 @@ export default function TasksSection({ tasks = [], loading, error, isOpen, onTog
               </span>
             )}
           </span>
-          {user?.roles?.some(r => ['admin', 'organiser', 'general'].includes(r)) && (
+          {['admin', 'organiser', 'general'].some(r => user?.roles?.includes(r)) && (
             <button
               onClick={e => { e.stopPropagation(); onAdd(); }}
               aria-label="Add task"

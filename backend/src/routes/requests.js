@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import pool from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
-import { hasRole } from '../middleware/auth.js';
+import { requireAuth, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
 import { sendPushToUsers } from '../push.js';
 import { canTransition } from '../utils/transitions.js';
@@ -11,31 +10,29 @@ const router = Router();
 
 router.use(requireAuth, applyActiveShop);
 
-/** Upsert an array of bike labels and return their ids. */
+/** Upsert an array of bike labels and return their ids in a single query. */
 async function resolveBikeIds(client, labels) {
   const unique = [...new Set(labels.map(l => l.trim().toUpperCase()))];
-  const ids = [];
-  for (const label of unique) {
-    const { rows } = await client.query(
-      `insert into bikes (label)
-       values ($1)
-       on conflict (label) do update set updated_at = now()
-       returning id`,
-      [label]
-    );
-    ids.push(rows[0].id);
-  }
-  return ids;
+  if (!unique.length) return [];
+  const { rows } = await client.query(
+    `insert into bikes (label)
+     select unnest($1::text[])
+     on conflict (label) do update set updated_at = now()
+     returning id`,
+    [unique]
+  );
+  return rows.map(r => r.id);
 }
 
 async function attachBikes(client, requestId, bikeIds) {
   await client.query('delete from request_bikes where request_id = $1', [requestId]);
-  for (let i = 0; i < bikeIds.length; i++) {
-    await client.query(
-      'insert into request_bikes (request_id, bike_id, position) values ($1, $2, $3) on conflict do nothing',
-      [requestId, bikeIds[i], i + 1]
-    );
-  }
+  if (!bikeIds.length) return;
+  await client.query(
+    `insert into request_bikes (request_id, bike_id, position)
+     select $1, unnest($2::uuid[]), generate_subscripts($2::uuid[], 1)
+     on conflict do nothing`,
+    [requestId, bikeIds]
+  );
 }
 
 async function auditLog(client, requestId, action, payload, userId) {
@@ -321,17 +318,23 @@ router.post('/:id/status', async (req, res, next) => {
 
     await auditLog(client, req.params.id, `status:${request.status}→${to}`, { from: request.status, to }, req.user.id);
 
-    if (to === 'in_progress') {
-      const { rows: bikeRows } = await client.query(
+    // Fetch bike labels + shop names once for transitions that need them (avoids duplicate queries)
+    let bikeRows = [], shopRows = [];
+    if (to === 'in_progress' || to === 'done') {
+      ({ rows: bikeRows } = await client.query(
         'select b.label from bikes b join request_bikes rb on rb.bike_id = b.id where rb.request_id = $1 order by rb.position',
         [req.params.id]
-      );
-      const { rows: shopRows } = await client.query(
+      ));
+      ({ rows: shopRows } = await client.query(
         'select fs.name as from_name, ts.name as to_name from shops fs, shops ts where fs.id = $1 and ts.id = $2',
         [request.from_shop_id, request.to_shop_id]
-      );
-      const bikeLabels = bikeRows.map(b => b.label).join(', ');
-      const { from_name, to_name } = shopRows[0];
+      ));
+    }
+    const { from_name, to_name } = shopRows[0] ?? {};
+    const bikeLabels   = bikeRows.map(b => b.label).join(', ');
+    const bikeLabelArr = bikeRows.map(b => b.label);
+
+    if (to === 'in_progress') {
       await sendPushToUsers(client, [req.user.id], {
         title: `🔒 Block bikes in BRM`,
         body:  `${from_name} → ${to_name} · ${bikeLabels}`,
@@ -349,17 +352,6 @@ router.post('/:id/status', async (req, res, next) => {
       );
 
       {
-        const { rows: shopRows } = await client.query(
-          'select fs.name as from_name, ts.name as to_name from shops fs, shops ts where fs.id = $1 and ts.id = $2',
-          [request.from_shop_id, request.to_shop_id]
-        );
-        const { rows: bikeRows } = await client.query(
-          'select b.label from bikes b join request_bikes rb on rb.bike_id = b.id where rb.request_id = $1 order by rb.position',
-          [req.params.id]
-        );
-        const bikeLabels      = bikeRows.map(b => b.label).join(', ');
-        const bikeLabelArr    = bikeRows.map(b => b.label);
-        const { from_name, to_name } = shopRows[0];
         const reasonLabel = { rental: 'Rental', repair: 'Repair', return: 'Return' }[request.reason] ?? request.reason;
 
         if (request.reason === 'repair') {

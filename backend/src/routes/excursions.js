@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import pool from '../db.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
-import { hasRole } from '../middleware/auth.js';
+import { requireAuth, requireRole, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
 
 const router = Router();
@@ -28,7 +27,7 @@ router.get('/', async (req, res, next) => {
     const scope = buildScope(req.user);
     const company = req.query.company?.trim() || null;
 
-    const conditions = ['e.id is not null'];
+    const conditions = [];
     const params = [];
 
     if (scope) {
@@ -41,8 +40,6 @@ router.get('/', async (req, res, next) => {
       conditions.push(`e.company = $${params.length}`);
     }
 
-    const where = conditions.join(' and ');
-
     // Approval visibility: approved always; pending/rejected only for approvers or creator
     const isPrivileged = hasRole(req.user, 'admin', 'organiser');
     if (!isPrivileged) {
@@ -50,7 +47,7 @@ router.get('/', async (req, res, next) => {
       conditions.push(`(e.approval_status = 'approved' or e.created_by_user_id = $${params.length})`);
     }
 
-    const where2 = conditions.join(' and ');
+    const where2 = conditions.length ? `where ${conditions.join(' and ')}` : '';
 
     const { rows } = await pool.query(`
       select e.*,
@@ -59,7 +56,7 @@ router.get('/', async (req, res, next) => {
         from excursions e
         left join users u on u.id = e.created_by_user_id
         left join shops s on s.id = e.shop_id
-       where ${where2}
+       ${where2}
        order by e.company asc, e.created_at desc
     `, params);
 

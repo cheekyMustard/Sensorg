@@ -5,13 +5,12 @@ import { useUpdateKb, useDeleteKb } from '../../hooks/useKb.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
 import ImageUploader from '../ImageUploader/ImageUploader.jsx';
 import ImageLightbox from '../ImageLightbox/ImageLightbox.jsx';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { resolveUploadUrl } from '../../utils/resolveUploadUrl.js';
 
 function KbImage({ url, alt }) {
   const [err,  setErr]  = useState(false);
   const [open, setOpen] = useState(false);
-  const src = url.startsWith('/uploads/') ? `${API_BASE}${url}` : url;
+  const src = resolveUploadUrl(url);
   if (err) return (
     <div className="mb-2 flex items-center justify-center gap-1 rounded-lg bg-stone-100 py-3 text-xs text-stone-400">
       <ImageOff size={13} /> Image unavailable

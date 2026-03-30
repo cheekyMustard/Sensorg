@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { fetchNotes, createNote, updateNote, deleteNote, fetchArchive } from '../api/notes.js';
+import { fetchNotes, createNote, updateNote, deleteNote } from '../api/notes.js';
+import { fetchArchive } from '../api/admin.js';
 
 export function useNotes() {
   return useQuery({ queryKey: ['notes'], queryFn: fetchNotes });

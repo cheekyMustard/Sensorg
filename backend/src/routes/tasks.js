@@ -1,8 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import pool from '../db.js';
-import { requireAuth, requireRole } from '../middleware/auth.js';
-import { hasRole } from '../middleware/auth.js';
+import { requireAuth, requireRole, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
 
 const router = Router();

@@ -4,33 +4,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useCompleteTask, useUncompleteTask, useUpdateTask, useDeleteTask, useApproveTask, useRejectTask } from '../../hooks/useTasks.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
 import { getShopMeta } from '../../utils/shopColors.js';
-
-const RECURRENCE_OPTIONS = [
-  { value: 'day:1',   label: 'Every day' },
-  { value: 'day:2',   label: 'Every 2 days' },
-  { value: 'day:3',   label: 'Every 3 days' },
-  { value: 'day:4',   label: 'Every 4 days' },
-  { value: 'day:5',   label: 'Every 5 days' },
-  { value: 'day:6',   label: 'Every 6 days' },
-  { value: 'week:1',  label: 'Every week' },
-  { value: 'month:1', label: 'Every month' },
-];
-
-function recurrenceLabel(unit, interval) {
-  if (unit === 'week')  return 'Every week';
-  if (unit === 'month') return 'Every month';
-  if (interval === 1)   return null;
-  return `Every ${interval} days`;
-}
-
-function recurrenceKey(unit, interval) {
-  return `${unit}:${interval}`;
-}
-
-function parseRecurrenceKey(key) {
-  const [unit, interval] = key.split(':');
-  return { recurrence_unit: unit, recurrence_interval: Number(interval) };
-}
+import { RECURRENCE_OPTIONS, parseRecurrenceKey, recurrenceKey, recurrenceLabel } from '../../utils/recurrence.js';
 
 function formatTime(iso) {
   return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });

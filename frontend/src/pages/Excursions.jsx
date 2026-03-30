@@ -4,7 +4,7 @@ import ImageUploader from '../components/ImageUploader/ImageUploader.jsx';
 import { useExcursions, useCreateExcursion, useDeleteExcursion, useApproveExcursion, useRejectExcursion } from '../hooks/useExcursions.js';
 import ImageLightbox from '../components/ImageLightbox/ImageLightbox.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { useShops } from '../hooks/useRequests.js';
+import { useShops } from '../hooks/useShops.js';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog.jsx';
 
 // ── Company colour palette ──────────────────────────────────────────────────
@@ -22,7 +22,7 @@ function companyColor(name) {
 
 const KNOWN_COMPANIES = ['LCT', 'First Minute', 'Lanzabuggy', 'Paracraft'];
 
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { resolveUploadUrl } from '../utils/resolveUploadUrl.js';
 
 const inputCls = 'rounded-lg border px-3 py-2 text-sm outline-none transition-shadow w-full bg-white';
 const inputStyle = { borderColor: '#D1D5DB' };
@@ -189,21 +189,23 @@ function ExcursionCard({ entry }) {
         {/* Image — small thumbnail, click to expand */}
         {entry.image_url && !imgError && (
           <>
-            <img
-              src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
-              alt={entry.topic}
-              className="cursor-zoom-in object-cover"
-              style={{ maxHeight: 100, width: 'auto', maxWidth: '100%' }}
-              onError={() => setImgError(true)}
-              onClick={() => setLightbox(true)}
-            />
-            {lightbox && (
-              <ImageLightbox
-                src={entry.image_url.startsWith('/uploads/') ? `${API_BASE}${entry.image_url}` : entry.image_url}
+            {(() => { const imgSrc = resolveUploadUrl(entry.image_url); return (<>
+              <img
+                src={imgSrc}
                 alt={entry.topic}
-                onClose={() => setLightbox(false)}
+                className="cursor-zoom-in object-cover"
+                style={{ maxHeight: 100, width: 'auto', maxWidth: '100%' }}
+                onError={() => setImgError(true)}
+                onClick={() => setLightbox(true)}
               />
-            )}
+              {lightbox && (
+                <ImageLightbox
+                  src={imgSrc}
+                  alt={entry.topic}
+                  onClose={() => setLightbox(false)}
+                />
+              )}
+            </>); })()}
           </>
         )}
         {entry.image_url && imgError && (

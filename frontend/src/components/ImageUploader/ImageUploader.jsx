@@ -2,8 +2,8 @@ import { useState, useRef, useCallback } from 'react';
 import ReactCrop, { centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Camera, ImagePlus, X, Crop, Upload, Trash2 } from 'lucide-react';
-
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+import { resolveUploadUrl } from '../../utils/resolveUploadUrl.js';
+import { getToken } from '../../api/client.js';
 
 function centerAspectCrop(mediaWidth, mediaHeight) {
   return centerCrop(
@@ -29,11 +29,6 @@ async function uploadBlob(blob, token) {
     throw new Error(body.error ?? `Upload failed (${res.status})`);
   }
   return (await res.json()).url;
-}
-
-/** Get the JWT token from localStorage (same key used by AuthContext) */
-function getToken() {
-  return localStorage.getItem('token');
 }
 
 /**
@@ -128,9 +123,7 @@ export default function ImageUploader({ value, onChange, label = 'Image' }) {
     onChange(null);
   }
 
-  const thumbUrl = value
-    ? (value.startsWith('/uploads/') ? `${API_BASE}${value}` : value)
-    : null;
+  const thumbUrl = resolveUploadUrl(value);
 
   return (
     <div className="flex flex-col gap-2">

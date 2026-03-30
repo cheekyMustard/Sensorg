@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { useAdminBikes, useUpdateAdminBike } from '../../hooks/useAdmin.js';
-import { useAdminShops } from '../../hooks/useAdmin.js';
+import { useAdminBikes, useUpdateAdminBike, useAdminShops } from '../../hooks/useAdmin.js';
 
 function BikeRow({ bike, shops }) {
   const [open, setOpen]   = useState(false);

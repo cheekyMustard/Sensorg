@@ -3,7 +3,7 @@ import { MapPin, Wrench, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { useBikesInventory, useMoveBike, useDeleteBike } from '../hooks/useBikes.js';
 import { useAdminShops } from '../hooks/useAdmin.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getShopMeta } from '../utils/shopColors.js';
+import { getShopMeta, SHOP_META } from '../utils/shopColors.js';
 import ConfirmDialog from '../components/ConfirmDialog/ConfirmDialog.jsx';
 
 function BikeCard({ bike, shops, isAdmin }) {
@@ -165,7 +165,7 @@ export default function Bikes() {
   }
 
   // Sort: known shops first (by SHOP_META order), then unknown
-  const shopOrder = ['Arcos', 'THB', 'Plaza'];
+  const shopOrder = SHOP_META.map(s => s.name);
   const sortedKeys = Object.keys(groups).sort((a, b) => {
     const ia = shopOrder.indexOf(a);
     const ib = shopOrder.indexOf(b);

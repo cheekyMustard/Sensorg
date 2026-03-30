@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { fetchRequests, createRequest, updateRequest, changeStatus, deleteRequest, fetchBikes } from '../api/requests.js';
-import { fetchShops } from '../api/shops.js';
 
 const PAGE_SIZE = 20;
 
@@ -66,14 +65,6 @@ export function useBikeSuggest(query, shopId = null) {
     queryFn:  () => fetchBikes(query, shopId),
     enabled:  query.trim().length > 0,
     staleTime: 10_000,
-  });
-}
-
-export function useShops() {
-  return useQuery({
-    queryKey: ['shops'],
-    queryFn:  fetchShops,
-    staleTime: 5 * 60_000,
   });
 }
 
