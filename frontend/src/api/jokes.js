@@ -1,4 +1,4 @@
-import api from './client.js';
+import { api } from './client.js';
 
 export const fetchJokes      = ()       => api.get('/api/jokes').then(r => r.data);
 export const createJoke      = (data)   => api.post('/api/jokes', data).then(r => r.data);
