@@ -290,10 +290,13 @@ export default function JokesSection({ isOpen, onToggle }) {
   return (
     <section className="mt-3 rounded-2xl overflow-hidden border border-gray-700">
       {/* Header */}
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center justify-between px-4 py-3"
+      <div
+        className="flex w-full items-center justify-between px-4 py-3 cursor-pointer"
         style={{ background: '#1A1800' }}
+        onClick={onToggle}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => e.key === 'Enter' && onToggle()}
       >
         <div className="flex items-center gap-2">
           <Smile size={16} style={{ color: '#FCD34D' }} />
@@ -329,7 +332,7 @@ export default function JokesSection({ isOpen, onToggle }) {
             style={{ color: '#FCD34D', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
           />
         </div>
-      </button>
+      </div>
 
       {/* Body */}
       {isOpen && (
