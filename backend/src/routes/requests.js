@@ -395,6 +395,22 @@ router.post('/:id/status', async (req, res, next) => {
           );
         }
       }
+
+      // Notify admin + organiser at the destination shop
+      const { rows: doneNotifyRows } = await client.query(
+        `select id from users where is_active = true
+           and (roles @> array['admin']::text[]
+                or (roles && array['organiser']::text[] and shop_id = $1))`,
+        [request.to_shop_id]
+      );
+      const doneNotifyIds = doneNotifyRows.map(r => r.id).filter(id => id !== req.user.id);
+      if (doneNotifyIds.length) {
+        const doneReasonLabel = { rental: 'Rental', repair: 'Repair', return: 'Return' }[request.reason] ?? request.reason;
+        await sendPushToUsers(client, doneNotifyIds, {
+          title: `✅ Delivery done: ${from_name} → ${to_name}`,
+          body:  `${doneReasonLabel} · ${bikeLabels}`,
+        });
+      }
     }
 
     await client.query('commit');

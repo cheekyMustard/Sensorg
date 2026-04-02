@@ -1,11 +1,21 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import KbCard from '../KbCard/KbCard.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { loadSeen, markAllSeen } from '../../utils/seenStorage.js';
+
+const KB_SEEN_KEY = 'sensorg_kb_seen';
 
 export default function KbSection({ articles = [], loading, error, isOpen, onToggle, onAdd }) {
   const { user } = useAuth();
   const [activeCategory, setActiveCategory] = useState(null);
+  const [seen, setSeen] = useState(() => loadSeen(KB_SEEN_KEY));
+
+  // Mark all articles as seen when the section is opened
+  useEffect(() => {
+    if (!isOpen || !articles.length) return;
+    setSeen(markAllSeen(KB_SEEN_KEY, articles.map(a => a.id)));
+  }, [isOpen, articles]);
 
   const categories = useMemo(() => {
     const cats = [...new Set(articles.map(a => a.category).filter(Boolean))].sort();
@@ -32,28 +42,33 @@ export default function KbSection({ articles = [], loading, error, isOpen, onTog
         <div className="flex flex-1 items-center gap-2">
           <span className="text-base font-bold tracking-tight text-white">
             Nice to know
-            {articles.length > 0 && (
-              <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.22)', color: '#fff' }}>
-                {articles.length}
-              </span>
-            )}
+            {(() => {
+              const unseen = articles.filter(a => !seen.has(a.id)).length;
+              return unseen > 0
+                ? <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-bold" style={{ background: '#FCD34D', color: '#1A1800' }}>{unseen} new</span>
+                : articles.length > 0
+                  ? <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.22)', color: '#fff' }}>{articles.length}</span>
+                  : null;
+            })()}
           </span>
           {['admin', 'organiser', 'mechanic'].some(r => user?.roles?.includes(r)) && (
             <button
               onClick={e => { e.stopPropagation(); onAdd(); }}
               aria-label="Add article"
-              className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors"
               style={{ background: 'rgba(255,255,255,0.2)' }}
             >
               <Plus size={16} className="text-white" />
             </button>
           )}
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white"
-          style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
+        <div className="flex min-h-[48px] min-w-[48px] items-center justify-center -mr-2">
+          <ChevronDown
+            size={18}
+            className="text-white"
+            style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
       </div>
 
       {isOpen && (

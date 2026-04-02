@@ -1,12 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { fetchExcursions, createExcursion, deleteExcursion, approveExcursion, rejectExcursion } from '../api/excursions.js';
+import { fetchExcursions, createExcursion, updateExcursion, deleteExcursion, approveExcursion, rejectExcursion } from '../api/excursions.js';
 
 export function useExcursions(company = null) {
   return useQuery({
     queryKey: ['excursions', company],
     queryFn:  () => fetchExcursions(company),
     staleTime: 30_000,
+  });
+}
+
+export function useUpdateExcursion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...data }) => updateExcursion(id, data),
+    onSuccess:  () => {
+      qc.invalidateQueries({ queryKey: ['excursions'] });
+      toast.success('Entry updated');
+    },
+    onError: (err) => toast.error(err.message),
   });
 }
 

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import pool from '../db.js';
 import { requireAuth, requireRole, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
+import { sendPushToUsers } from '../push.js';
 
 const router = Router();
 
@@ -71,7 +72,8 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
 
     let shopId = data.shop_id ?? req.user.shop_id ?? null;
     if (!hasRole(req.user, 'admin', 'organiser')) {
-      shopId = req.user.shop_id ?? null;
+      // General users may choose global (null) or their own shop — nothing else
+      shopId = data.shop_id === null ? null : (req.user.shop_id ?? null);
     }
 
     const approvalStatus = hasRole(req.user, 'admin', 'organiser') ? 'approved' : 'pending';
@@ -82,7 +84,60 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
        returning *`,
       [data.company, data.topic, data.note ?? null, data.image_url || null, shopId, approvalStatus, req.user.id]
     );
+
+    // Notify all admins + organisers when a general user creates an entry needing approval
+    if (approvalStatus === 'pending') {
+      const { rows: notifyRows } = await pool.query(
+        `select id from users where is_active = true and roles && array['admin','organiser']::text[]`
+      );
+      const notifyIds = notifyRows.map(r => r.id).filter(id => id !== req.user.id);
+      if (notifyIds.length) {
+        await sendPushToUsers(pool, notifyIds, {
+          title: '📋 New excursion entry pending',
+          body:  `${data.company} · ${data.topic}`,
+        });
+      }
+    }
+
     res.status(201).json(rows[0]);
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors });
+    next(err);
+  }
+});
+
+// PATCH /api/excursions/:id — admin, organiser
+const updateSchema = z.object({
+  company:   z.string().min(1).max(100).optional(),
+  topic:     z.string().min(1).max(200).optional(),
+  note:      z.string().max(2000).nullable().optional(),
+  image_url: z.string().max(1000).nullable().optional(),
+  shop_id:   z.string().uuid().nullable().optional(),
+});
+
+router.patch('/:id', requireRole('admin', 'organiser'), async (req, res, next) => {
+  try {
+    const data = updateSchema.parse(req.body);
+
+    const { rows: existing } = await pool.query('select * from excursions where id = $1', [req.params.id]);
+    if (!existing[0]) return res.status(404).json({ error: 'Not found' });
+
+    const fields = [];
+    const params = [req.params.id];
+    const add = (col, val) => { params.push(val); fields.push(`${col} = $${params.length}`); };
+
+    if (data.company   !== undefined) add('company',   data.company);
+    if (data.topic     !== undefined) add('topic',     data.topic);
+    if (data.note      !== undefined) add('note',      data.note ?? null);
+    if (data.image_url !== undefined) add('image_url', data.image_url ?? null);
+    if (data.shop_id   !== undefined) add('shop_id',   data.shop_id ?? null);
+    add('updated_at', new Date());
+
+    const { rows } = await pool.query(
+      `update excursions set ${fields.join(', ')} where id = $1 returning *`,
+      params
+    );
+    res.json(rows[0]);
   } catch (err) {
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors });
     next(err);
@@ -101,15 +156,13 @@ router.post('/:id/approve', requireRole('admin', 'organiser'), async (req, res, 
   } catch (err) { next(err); }
 });
 
-// POST /api/excursions/:id/reject — admin, organiser
+// POST /api/excursions/:id/reject — admin, organiser — deletes the entry
 router.post('/:id/reject', requireRole('admin', 'organiser'), async (req, res, next) => {
   try {
-    const { rows } = await pool.query(
-      `update excursions set approval_status = 'rejected', updated_at = now() where id = $1 returning *`,
-      [req.params.id]
-    );
+    const { rows } = await pool.query('select id from excursions where id = $1', [req.params.id]);
     if (!rows[0]) return res.status(404).json({ error: 'Not found' });
-    res.json(rows[0]);
+    await pool.query('delete from excursions where id = $1', [req.params.id]);
+    res.status(204).end();
   } catch (err) { next(err); }
 });
 

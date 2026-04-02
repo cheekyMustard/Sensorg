@@ -35,6 +35,8 @@ export async function sendPushToUsers(client, userIds, payload) {
         // 410 Gone or 404 = subscription expired → remove it
         if (err.statusCode === 410 || err.statusCode === 404) {
           await client.query('delete from push_subscriptions where id = $1', [sub.id]);
+        } else {
+          console.error('[push] sendNotification failed:', err.statusCode, err.message);
         }
       }
     })

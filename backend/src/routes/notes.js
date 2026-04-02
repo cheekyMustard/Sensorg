@@ -3,21 +3,26 @@ import { z } from 'zod';
 import pool from '../db.js';
 import { requireAuth, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
+import { sendPushToUsers } from '../push.js';
 
 const router = Router();
 
 router.use(requireAuth, applyActiveShop);
 
+const NOTE_CATEGORIES = ['need_stuff', 'information', 'other'];
+
 const createSchema = z.object({
-  title:   z.string().min(1).max(200),
-  content: z.string().default(''),
-  shop_id: z.string().uuid().nullable().optional(),
+  title:    z.string().min(1).max(200),
+  content:  z.string().default(''),
+  shop_id:  z.string().uuid().nullable().optional(),
+  category: z.enum(NOTE_CATEGORIES).nullable().optional(),
 });
 
 const patchSchema = z.object({
-  title:   z.string().min(1).max(200).optional(),
-  content: z.string().optional(),
-  is_done: z.boolean().optional(),
+  title:    z.string().min(1).max(200).optional(),
+  content:  z.string().optional(),
+  is_done:  z.boolean().optional(),
+  category: z.enum(NOTE_CATEGORIES).nullable().optional(),
 });
 
 /** Admin/organiser see all shops; everyone else scoped to their shop. */
@@ -77,11 +82,25 @@ router.post('/', async (req, res, next) => {
     }
 
     const { rows } = await pool.query(
-      `insert into notes (shop_id, title, content, created_by_user_id, updated_by_user_id)
-       values ($1, $2, $3, $4, $4)
+      `insert into notes (shop_id, title, content, category, created_by_user_id, updated_by_user_id)
+       values ($1, $2, $3, $4, $5, $5)
        returning *`,
-      [shopId, data.title, data.content, req.user.id]
+      [shopId, data.title, data.content, data.category ?? null, req.user.id]
     );
+
+    if (data.category === 'need_stuff') {
+      const { rows: notifyRows } = await pool.query(
+        `select id from users where is_active = true and roles && array['driver','organiser','admin']::text[]`
+      );
+      const notifyIds = notifyRows.map(r => r.id).filter(id => id !== req.user.id);
+      if (notifyIds.length) {
+        await sendPushToUsers(pool, notifyIds, {
+          title: '📦 We need stuff',
+          body:  data.title,
+        });
+      }
+    }
+
     res.status(201).json(rows[0]);
   } catch (err) {
     if (err instanceof z.ZodError) return res.status(400).json({ error: err.errors });
@@ -105,9 +124,10 @@ router.patch('/:id', async (req, res, next) => {
     const params = [req.params.id];
     const add = (col, val) => { params.push(val); fields.push(`${col} = $${params.length}`); };
 
-    if (data.title   !== undefined) add('title',   data.title);
-    if (data.content !== undefined) add('content', data.content);
-    if (data.is_done !== undefined) {
+    if (data.title    !== undefined) add('title',    data.title);
+    if (data.content  !== undefined) add('content',  data.content);
+    if (data.category !== undefined) add('category', data.category ?? null);
+    if (data.is_done  !== undefined) {
       add('is_done', data.is_done);
       add('done_at', data.is_done ? new Date() : null);
     }
