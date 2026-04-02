@@ -5,6 +5,7 @@ import { useCreateRequest } from '../../hooks/useRequests.js';
 import { useShops } from '../../hooks/useShops.js';
 import { SHOP_META } from '../../utils/shopColors.js';
 import { useCreateNote } from '../../hooks/useNotes.js';
+import { NOTE_CATEGORIES } from '../../utils/noteCategories.js';
 import { useCreateTask } from '../../hooks/useTasks.js';
 import { useCreateKb } from '../../hooks/useKb.js';
 import BikeTagsInput from '../BikeTagsInput/BikeTagsInput.jsx';
@@ -130,13 +131,18 @@ function NoteForm({ onClose }) {
   const { user, activeShop, hasRole } = useAuth();
   const { data: shops = [] } = useShops();
   const createMutation = useCreateNote();
-  const [form, setForm] = useState({ title: '', content: '', shop_id: activeShop?.id ?? '' });
+  const [form, setForm] = useState({ title: '', content: '', shop_id: activeShop?.id ?? '', category: '' });
 
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await createMutation.mutateAsync({ title: form.title, content: form.content, shop_id: form.shop_id || null });
+    await createMutation.mutateAsync({
+      title:    form.title,
+      content:  form.content,
+      shop_id:  form.shop_id || null,
+      category: form.category || null,
+    });
     onClose();
   }
 
@@ -162,6 +168,27 @@ function NoteForm({ onClose }) {
         )}
       </div>
 
+      {/* Category picker — pill buttons */}
+      <div className="flex flex-col gap-1.5">
+        <Label>Topic</Label>
+        <div className="flex gap-2 flex-wrap">
+          {NOTE_CATEGORIES.map(c => (
+            <button
+              key={c.value}
+              type="button"
+              onClick={() => set('category', form.category === c.value ? '' : c.value)}
+              className="rounded-full px-3 py-1 text-xs font-semibold transition-all"
+              style={form.category === c.value
+                ? { background: c.bg, color: c.color, outline: `2px solid ${c.color}`, outlineOffset: '1px' }
+                : { background: '#F3F4F6', color: '#6B7280' }
+              }
+            >
+              {c.icon} {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-1">
         <Label>Title</Label>
         <input value={form.title} onChange={e => set('title', e.target.value)} required
@@ -170,7 +197,7 @@ function NoteForm({ onClose }) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <Label>Content</Label>
+        <Label>Content <span className="font-normal text-stone-400">(optional)</span></Label>
         <textarea value={form.content} onChange={e => set('content', e.target.value)}
           rows={4} placeholder="Write something…"
           className={`${inputCls} resize-none`} style={inputStyle} onFocus={onFocus} onBlur={onBlur} />

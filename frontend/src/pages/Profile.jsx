@@ -6,9 +6,7 @@ import { useUsers } from '../hooks/useUsers.js';
 import { Bell, BellOff, ShieldCheck, CheckSquare, Square } from 'lucide-react';
 import { SHOP_META } from '../utils/shopColors.js';
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+import { formatDate } from '../utils/formatDate.js';
 
 function JobTodoRow({ job }) {
   const toggle = useBrmToggle();
@@ -118,7 +116,7 @@ function TeamOverview() {
                   <div key={u.id} className="flex items-center justify-between px-3 py-2">
                     <div>
                       <span className="text-sm font-medium" style={{ color: shop.text }}>{u.username}</span>
-                      <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: shop.border, color: shop.text }}>{(u.roles ?? []).join(', ')}</span>
+                      <span className="ml-2 rounded-full px-3 py-0.5 font-semibold" style={{ background: shop.border, color: shop.text, fontSize: 13 }}>{(u.roles ?? []).join(', ')}</span>
                     </div>
                     <span className="text-xs text-gray-400">since {formatTime(u.last_seen_at)}</span>
                   </div>
@@ -138,7 +136,7 @@ function TeamOverview() {
                   <div key={u.id} className="flex items-center justify-between px-3 py-2">
                     <div>
                       <span className="text-sm font-medium text-gray-700">{u.username}</span>
-                      <span className="ml-2 rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-600">{(u.roles ?? []).join(', ')}</span>
+                      <span className="ml-2 rounded-full bg-gray-200 px-3 py-0.5 font-semibold text-gray-600" style={{ fontSize: 13 }}>{(u.roles ?? []).join(', ')}</span>
                     </div>
                     <span className="text-xs text-gray-400">since {formatTime(u.last_seen_at)}</span>
                   </div>
@@ -158,7 +156,7 @@ export default function Profile() {
 
   return (
     <main className="flex-1 px-4 py-4 pb-(--bottom-nav-height)">
-      <h2 className="text-lg font-semibold text-gray-800">Profile</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Profile</h2>
       <p className="mt-1 text-sm text-gray-500">{user?.username} · {(user?.roles ?? []).join(', ')}</p>
 
       {/* Active jobs to-do */}
@@ -167,52 +165,58 @@ export default function Profile() {
       {/* Team overview */}
       <TeamOverview />
 
-      {/* Push notifications */}
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-4">
-        <p className="text-sm font-medium text-gray-800">Push notifications</p>
+      {/* Settings section */}
+      <div className="mt-6">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-400">Settings</h3>
+        <div className="flex flex-col gap-2">
+          {/* Push notifications */}
+          <div className="rounded-xl border border-gray-200 bg-white p-4">
+            <p className="text-sm font-medium text-gray-800">Push notifications</p>
 
-        {!supported && (
-          <p className="mt-1 text-xs text-gray-400">Not supported by this browser.</p>
-        )}
+            {!supported && (
+              <p className="mt-1 text-xs text-gray-400">Not supported by this browser.</p>
+            )}
 
-        {supported && permission === 'denied' && (
-          <p className="mt-1 text-xs text-red-500">
-            Notifications are blocked. Allow them in your browser settings.
-          </p>
-        )}
+            {supported && permission === 'denied' && (
+              <p className="mt-1 text-xs text-red-500">
+                Notifications are blocked. Allow them in your browser settings.
+              </p>
+            )}
 
-        {supported && permission !== 'denied' && (
-          <>
-            <p className="mt-1 text-xs text-gray-500">
-              {subscribed
-                ? 'You will be notified when a delivery arrives at your shop.'
-                : 'Get notified when a delivery arrives at your shop.'}
-            </p>
-            <button
-              onClick={subscribed ? unsubscribe : subscribe}
-              disabled={loading}
-              className={`mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors ${
-                subscribed
-                  ? 'border border-gray-300 text-gray-600 hover:bg-gray-50'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
+            {supported && permission !== 'denied' && (
+              <>
+                <p className="mt-1 text-xs text-gray-500">
+                  {subscribed
+                    ? 'You will be notified when a delivery arrives at your shop.'
+                    : 'Get notified when a delivery arrives at your shop.'}
+                </p>
+                <button
+                  onClick={subscribed ? unsubscribe : subscribe}
+                  disabled={loading}
+                  className={`mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors ${
+                    subscribed
+                      ? 'border border-gray-300 text-gray-600 hover:bg-gray-50'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                >
+                  {subscribed ? <BellOff size={15} /> : <Bell size={15} />}
+                  {loading ? 'Please wait…' : subscribed ? 'Disable notifications' : 'Enable notifications'}
+                </button>
+              </>
+            )}
+          </div>
+
+          {user?.roles?.includes('admin') && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
             >
-              {subscribed ? <BellOff size={15} /> : <Bell size={15} />}
-              {loading ? 'Please wait…' : subscribed ? 'Disable notifications' : 'Enable notifications'}
-            </button>
-          </>
-        )}
+              <ShieldCheck size={16} className="text-blue-600" />
+              Admin panel
+            </Link>
+          )}
+        </div>
       </div>
-
-      {user?.roles?.includes('admin') && (
-        <Link
-          to="/admin"
-          className="mt-6 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-800 hover:bg-gray-50"
-        >
-          <ShieldCheck size={16} className="text-blue-600" />
-          Admin panel
-        </Link>
-      )}
 
     </main>
   );

@@ -54,7 +54,7 @@ export default function TaskCard({ task }) {
     setDraft({ title: task.title, description: task.description, recurrence: initialRecurrence });
   }
 
-  const badge = recurrenceLabel(task.recurrence_unit ?? 'day', task.recurrence_interval ?? 1);
+  const badge = task.recurrence_unit ? recurrenceLabel(task.recurrence_unit, task.recurrence_interval ?? 1) : null;
 
   return (
     <>
@@ -70,7 +70,7 @@ export default function TaskCard({ task }) {
             : isApprovalPending ? '#fffbeb'
             : isCompleted ? '#f0faf0'
             : '#fff',
-          opacity: (isRejected || isApprovalPending) && !canManage ? 0.75 : 1,
+          opacity: isCompleted ? 0.55 : (isRejected || isApprovalPending) && !canManage ? 0.75 : 1,
         }}
       >
         <div className="flex items-start gap-3">
@@ -130,12 +130,12 @@ export default function TaskCard({ task }) {
               </div>
             ) : (
               <>
-                <p className={`text-sm font-semibold ${isCompleted ? 'line-through' : ''}`}
+                <p className={`text-base font-semibold ${isCompleted ? 'line-through' : ''}`}
                   style={{ color: isCompleted ? 'var(--brand-green)' : 'var(--charcoal)' }}>
                   {task.title}
                 </p>
                 {task.description && (
-                  <p className={`mt-0.5 text-xs ${isCompleted ? '' : 'text-stone-500'}`}
+                  <p className={`mt-0.5 text-sm ${isCompleted ? '' : 'text-stone-500'}`}
                     style={isCompleted ? { color: 'var(--brand-green)', opacity: 0.75 } : {}}>
                     {task.description}
                   </p>
@@ -195,13 +195,13 @@ export default function TaskCard({ task }) {
           </div>
 
           {canManage && !editing && (
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center shrink-0">
               <button onClick={() => setEditing(true)}
-                className="rounded-lg p-1 text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-colors">
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-colors">
                 <Pencil size={13} />
               </button>
               <button onClick={() => setConfirm(true)} disabled={deleteMutation.isPending}
-                className="rounded-lg p-1 text-stone-300 hover:text-red-400 hover:bg-red-50 disabled:opacity-50 transition-colors">
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg text-stone-300 hover:text-red-400 hover:bg-red-50 disabled:opacity-50 transition-colors">
                 <Trash2 size={13} />
               </button>
             </div>

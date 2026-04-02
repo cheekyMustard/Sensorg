@@ -31,17 +31,19 @@ export default function DeliveriesSection({
           <button
             onClick={e => { e.stopPropagation(); onAdd(); }}
             aria-label="Add delivery"
-            className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors"
             style={{ background: 'rgba(255,255,255,0.2)' }}
           >
             <Plus size={16} className="text-white" />
           </button>
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white"
-          style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
+        <div className="flex min-h-[48px] min-w-[48px] items-center justify-center -mr-2">
+          <ChevronDown
+            size={18}
+            className="text-white"
+            style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
       </div>
 
       {isOpen && (

@@ -1,7 +1,16 @@
+import { useState } from 'react';
 import { ChevronDown, Plus } from 'lucide-react';
 import NoteCard from '../NoteCard/NoteCard.jsx';
+import { NOTE_CATEGORIES, categoryMeta } from '../../utils/noteCategories.js';
 
 export default function NotesSection({ notes = [], loading, error, isOpen, onToggle, onAdd }) {
+  const [activeFilter, setFilter] = useState(null);
+
+  const visible = activeFilter ? notes.filter(n => n.category === activeFilter) : notes;
+
+  // Only show filter pills for categories that actually exist in the current note list
+  const presentCategories = NOTE_CATEGORIES.filter(c => notes.some(n => n.category === c.value));
+
   return (
     <section className="mt-3">
       <div
@@ -16,10 +25,10 @@ export default function NotesSection({ notes = [], loading, error, isOpen, onTog
         }}
       >
         <div className="flex flex-1 items-center gap-2">
-          <span className="text-base font-bold tracking-tight text-white">
+          <span className="text-base font-bold tracking-tight" style={{ color: '#1A1A1A' }}>
             Notes
             {notes.length > 0 && (
-              <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.22)', color: '#fff' }}>
+              <span className="ml-2 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: 'rgba(0,0,0,0.12)', color: '#1A1A1A' }}>
                 {notes.length}
               </span>
             )}
@@ -27,21 +36,52 @@ export default function NotesSection({ notes = [], loading, error, isOpen, onTog
           <button
             onClick={e => { e.stopPropagation(); onAdd(); }}
             aria-label="Add note"
-            className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
-            style={{ background: 'rgba(255,255,255,0.2)' }}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors"
+            style={{ background: 'rgba(0,0,0,0.12)' }}
           >
-            <Plus size={16} className="text-white" />
+            <Plus size={16} style={{ color: '#1A1A1A' }} />
           </button>
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white"
-          style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
+        <div className="flex min-h-[48px] min-w-[48px] items-center justify-center -mr-2">
+          <ChevronDown
+            size={18}
+            style={{ color: '#1A1A1A', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
       </div>
 
       {isOpen && (
         <div className="flex flex-col gap-2 rounded-b-xl p-3" style={{ background: '#323232' }}>
+          {/* Category filter pills */}
+          {presentCategories.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <button
+                onClick={() => setFilter(null)}
+                className="shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-colors"
+                style={activeFilter === null
+                  ? { background: '#D4A574', color: '#1A1A1A' }
+                  : { background: '#2A2A2A', color: '#9CA3AF', border: '1px solid #3A3A3A' }}
+              >
+                All
+              </button>
+              {presentCategories.map(c => {
+                const active = activeFilter === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    onClick={() => setFilter(active ? null : c.value)}
+                    className="shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-colors"
+                    style={active
+                      ? { background: c.bg, color: c.color }
+                      : { background: '#2A2A2A', color: '#9CA3AF', border: '1px solid #3A3A3A' }}
+                  >
+                    {c.icon} {c.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {loading && (
             <div className="flex flex-col gap-2">
               {[1, 2].map(i => (
@@ -56,13 +96,13 @@ export default function NotesSection({ notes = [], loading, error, isOpen, onTog
             </p>
           )}
 
-          {!loading && !error && notes.length === 0 && (
+          {!loading && !error && visible.length === 0 && (
             <p className="rounded-xl px-4 py-6 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              No notes yet
+              {activeFilter ? `No "${categoryMeta(activeFilter)?.label}" notes yet` : 'No notes yet'}
             </p>
           )}
 
-          {!loading && !error && notes.map(n => (
+          {!loading && !error && visible.map(n => (
             <NoteCard key={n.id} note={n} />
           ))}
         </div>

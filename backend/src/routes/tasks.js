@@ -3,6 +3,7 @@ import { z } from 'zod';
 import pool from '../db.js';
 import { requireAuth, requireRole, hasRole } from '../middleware/auth.js';
 import { applyActiveShop } from '../middleware/applyActiveShop.js';
+import { sendPushToUsers } from '../push.js';
 
 const router = Router();
 
@@ -82,6 +83,7 @@ router.get('/', async (req, res, next) => {
               and tc.completed_date = (${PERIOD_SQL})
         left join users u on u.id = tc.completed_by_user_id
        where ${where}
+         and not (t.is_one_time = true and tc.completed_at < now() - interval '1 day')
        order by t.shop_id nulls last, t.title
     `, params);
 
@@ -108,6 +110,20 @@ router.post('/', requireRole('admin', 'organiser', 'general'), async (req, res, 
         );
         created.push(rows[0]);
       }
+      // Notify all organisers + admins when a task needs approval
+      if (approvalStatus === 'pending') {
+        const { rows: organiserRows } = await client.query(
+          `select id from users where roles && array['organiser','admin']::text[] and is_active = true`
+        );
+        const notifyIds = organiserRows.map(r => r.id).filter(id => id !== req.user.id);
+        if (notifyIds.length) {
+          await sendPushToUsers(client, notifyIds, {
+            title: '📋 Task needs approval',
+            body:  data.title,
+          });
+        }
+      }
+
       await client.query('commit');
       res.status(201).json(created);
     } catch (err) {
@@ -197,11 +213,6 @@ router.post('/:id/complete', async (req, res, next) => {
        do update set completed_by_user_id = $3, completed_at = now()
        returning *`,
       [req.params.id, shopId, req.user.id]
-    );
-    await pool.query(
-      `update tasks set is_active = false, updated_at = now()
-        where id = $1 and is_one_time = true`,
-      [req.params.id]
     );
     res.status(201).json(rows[0]);
   } catch (err) { next(err); }

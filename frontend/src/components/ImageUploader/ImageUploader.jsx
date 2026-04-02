@@ -13,6 +13,8 @@ function centerAspectCrop(mediaWidth, mediaHeight) {
   );
 }
 
+const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+
 /** Upload a canvas blob to /api/uploads and return the URL */
 async function uploadBlob(blob, token) {
   const fd = new FormData();

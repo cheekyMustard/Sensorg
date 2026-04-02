@@ -183,7 +183,7 @@ export default function Bikes() {
     <div className="flex flex-col min-h-screen pb-20" style={{ background: 'var(--bg)' }}>
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
-        <h1 className="text-lg font-bold text-white">Bikes</h1>
+        <h1 className="text-2xl font-bold text-white">Bikes</h1>
         <p className="text-xs text-gray-400">{totalActive} active · {bikes.length} total</p>
       </div>
 
@@ -193,7 +193,7 @@ export default function Bikes() {
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Search label…"
+          placeholder="Search bikes by label…"
           className="flex-1 rounded-xl border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-gray-500 focus:outline-none"
         />
         <div className="flex rounded-xl border border-gray-700 overflow-hidden text-xs">

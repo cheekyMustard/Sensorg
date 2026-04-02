@@ -18,8 +18,6 @@ export default function Home() {
   const [openSection, setOpenSection] = useState('deliveries');
   const [addMode, setAddMode] = useState(null); // 'delivery' | 'note' | 'task' | 'kb'
 
-  const canSeeRepairs = user?.roles?.some(r => ['mechanic', 'admin'].includes(r));
-
   function toggle(id) {
     setOpenSection(cur => cur === id ? null : id);
   }
@@ -47,15 +45,13 @@ export default function Home() {
           onToggle={() => toggle('deliveries')}
           onAdd={() => setAddMode('delivery')}
         />
-        {canSeeRepairs && (
-          <RepairRequestsSection
-            repairRequests={repairRequests}
-            loading={repairLoading}
-            error={repairError}
-            isOpen={openSection === 'repairs'}
-            onToggle={() => toggle('repairs')}
-          />
-        )}
+        <RepairRequestsSection
+          repairRequests={repairRequests}
+          loading={repairLoading}
+          error={repairError}
+          isOpen={openSection === 'repairs'}
+          onToggle={() => toggle('repairs')}
+        />
         <NotesSection
           notes={notes} loading={noteLoading} error={noteError}
           isOpen={openSection === 'notes'} onToggle={() => toggle('notes')}

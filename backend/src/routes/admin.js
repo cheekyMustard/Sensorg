@@ -209,7 +209,7 @@ router.patch('/bikes/:id', async (req, res, next) => {
 // GET /api/admin/archive
 router.get('/archive', async (_req, res, next) => {
   try {
-    const [requestsRes, notesRes, tasksRes] = await Promise.all([
+    const [requestsRes, notesRes, tasksRes, repairRes] = await Promise.all([
       pool.query(`
         select r.id, r.reason, r.status, r.date_rental, r.note,
                fs.name as from_shop_name, ts.name as to_shop_name,
@@ -247,12 +247,24 @@ router.get('/archive', async (_req, res, next) => {
          order by t.updated_at desc
          limit 200
       `),
+      pool.query(`
+        select rr.id, rr.bike_labels, rr.arrival_date, rr.problem_description,
+               rr.done_at, rr.shop_id, s.name as shop_name,
+               u.username as taken_by_username
+          from repair_requests rr
+          left join shops s on s.id = rr.shop_id
+          left join users u on u.id = rr.taken_by_user_id
+         where rr.is_archived = true
+         order by rr.done_at desc
+         limit 200
+      `),
     ]);
 
     res.json({
-      requests: requestsRes.rows,
-      notes:    notesRes.rows,
-      tasks:    tasksRes.rows,
+      requests:        requestsRes.rows,
+      notes:           notesRes.rows,
+      tasks:           tasksRes.rows,
+      repair_requests: repairRes.rows,
     });
   } catch (err) { next(err); }
 });

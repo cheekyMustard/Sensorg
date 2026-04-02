@@ -4,10 +4,9 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { useUpdateNote, useDeleteNote, useMarkNoteDone } from '../../hooks/useNotes.js';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
 import { getShopMeta } from '../../utils/shopColors.js';
+import { NOTE_CATEGORIES, categoryMeta } from '../../utils/noteCategories.js';
 
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
+import { formatDate } from '../../utils/formatDate.js';
 
 const inputCls = 'rounded-lg border px-2 py-1 text-sm outline-none transition-shadow w-full';
 const inputStyle = { borderColor: '#e5d5c5' };
@@ -28,12 +27,14 @@ export default function NoteCard({ note }) {
   const canDelete = canEdit;
   const isDirty   = draft !== null;
 
-  function startEdit() { setDraft({ title: note.title, content: note.content }); }
+  function startEdit() { setDraft({ title: note.title, content: note.content, category: note.category ?? '' }); }
   function cancelEdit() { setDraft(null); }
   async function saveEdit() {
-    await updateMutation.mutateAsync({ id: note.id, data: draft });
+    await updateMutation.mutateAsync({ id: note.id, data: { ...draft, category: draft.category || null } });
     setDraft(null);
   }
+
+  const meta = note.category ? categoryMeta(note.category) : null;
 
   return (
     <>
@@ -55,31 +56,55 @@ export default function NoteCard({ note }) {
               className={`${inputCls} font-semibold`} style={inputStyle} onFocus={onFocus} onBlur={onBlur}
             />
           ) : (
-            <p className="text-sm font-semibold" style={{ color: 'var(--charcoal)' }}>{note.title}</p>
+            <p className="text-base font-semibold" style={{ color: 'var(--charcoal)' }}>{note.title}</p>
           )}
           <span className="shrink-0 text-xs text-stone-400">{formatDate(note.created_at)}</span>
         </div>
 
-        {note.shop_name && (
-          <span
-            className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
-            style={{ background: shopMeta ? shopMeta.light : '#F5EDE0', color: shopMeta ? shopMeta.text : '#8B6040', border: `1px solid ${shopMeta ? shopMeta.border : '#e5c9a5'}` }}
-          >
-            {note.shop_name}
-          </span>
-        )}
+        {/* Tags row: shop + category */}
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {note.shop_name && (
+            <span
+              className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+              style={{ background: shopMeta ? shopMeta.light : '#F5EDE0', color: shopMeta ? shopMeta.text : '#8B6040', border: `1px solid ${shopMeta ? shopMeta.border : '#e5c9a5'}` }}
+            >
+              {note.shop_name}
+            </span>
+          )}
+          {meta && !isDirty && (
+            <span
+              className="inline-block rounded-full px-2 py-0.5 text-xs font-semibold"
+              style={{ background: meta.bg, color: meta.color }}
+            >
+              {meta.icon} {meta.label}
+            </span>
+          )}
+        </div>
 
         <div className="mt-2">
           {isDirty ? (
-            <textarea
-              value={draft.content}
-              onChange={e => setDraft(d => ({ ...d, content: e.target.value }))}
-              rows={3}
-              className={`${inputCls} resize-none`} style={inputStyle} onFocus={onFocus} onBlur={onBlur}
-            />
+            <>
+              <textarea
+                value={draft.content}
+                onChange={e => setDraft(d => ({ ...d, content: e.target.value }))}
+                rows={3}
+                className={`${inputCls} resize-none`} style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+              />
+              {/* Category picker in edit mode */}
+              <select
+                value={draft.category}
+                onChange={e => setDraft(d => ({ ...d, category: e.target.value }))}
+                className={`${inputCls} mt-2`} style={inputStyle} onFocus={onFocus} onBlur={onBlur}
+              >
+                <option value="">— No category —</option>
+                {NOTE_CATEGORIES.map(c => (
+                  <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
+                ))}
+              </select>
+            </>
           ) : (
             note.content && (
-              <p className="whitespace-pre-wrap text-sm text-stone-600">{note.content}</p>
+              <p className="whitespace-pre-wrap text-sm italic text-stone-600">{note.content}</p>
             )
           )}
         </div>
@@ -130,22 +155,26 @@ export default function NoteCard({ note }) {
           </div>
 
           {!isDirty && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <button
                 onClick={() => doneMutation.mutate({ id: note.id, done: !note.is_done })}
                 disabled={doneMutation.isPending}
                 aria-label={note.is_done ? 'Mark as not done' : 'Mark as done'}
-                className="transition-colors disabled:opacity-50"
-                style={{ color: note.is_done ? '#22c55e' : '#d1c4b8' }}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors disabled:opacity-50"
+                style={note.is_done
+                  ? { borderColor: '#22c55e', color: '#22c55e', background: '#f0fdf4' }
+                  : { borderColor: '#D4A574', color: '#9C7A50', background: '#FDF8F3' }
+                }
               >
-                {note.is_done ? <CheckCircle2 size={17} /> : <Circle size={17} />}
+                {note.is_done ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                {note.is_done ? 'Done' : 'Done?'}
               </button>
               {canDelete && (
                 <button
                   onClick={() => setConfirm(true)}
                   disabled={deleteMutation.isPending}
                   aria-label="Delete note"
-                  className="text-stone-300 hover:text-red-400 disabled:opacity-50 transition-colors"
+                  className="flex min-h-[44px] min-w-[44px] items-center justify-center text-stone-300 hover:text-red-400 disabled:opacity-50 transition-colors"
                 >
                   <Trash2 size={15} />
                 </button>

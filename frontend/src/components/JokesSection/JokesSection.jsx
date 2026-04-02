@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import ImageUploader from '../ImageUploader/ImageUploader.jsx';
 import ImageLightbox from '../ImageLightbox/ImageLightbox.jsx';
 import { resolveUploadUrl } from '../../utils/resolveUploadUrl.js';
+import { formatDate } from '../../utils/formatDate.js';
 
 // ── Seen tracking via localStorage ─────────────────────────────────────────
 function loadSeen() {
@@ -16,10 +17,6 @@ function saveSeen(set) {
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 function preview(text, chars = 110) {
   if (!text) return null;
@@ -144,53 +141,55 @@ function JokeCard({ joke, seen, onSeen }) {
       >
         {/* ── Preview (collapsed) ── */}
         {!expanded && (
-          <div className="flex items-center gap-3 px-3 py-3">
-            {/* Tiny image thumbnail */}
+          <div>
+            {/* Large image banner when image-only or image+text joke */}
             {imgSrc && !imgError && (
               <img
                 src={imgSrc}
                 alt=""
-                className="shrink-0 rounded-xl object-cover"
-                style={{ width: 52, height: 52 }}
+                className="w-full object-cover"
+                style={{ maxHeight: 120, minHeight: 80, background: '#111', borderRadius: '1rem 1rem 0 0' }}
                 onError={() => setImgError(true)}
               />
             )}
 
-            <div className="min-w-0 flex-1">
-              {/* Text preview */}
-              {joke.content ? (
-                <p
-                  className="text-sm leading-snug"
-                  style={{ color: seen ? '#9CA3AF' : '#FDE68A' }}
-                >
-                  {preview(joke.content)}
-                </p>
-              ) : (
-                <p className="text-sm italic" style={{ color: seen ? '#6B7280' : '#FCD34D' }}>
-                  📷 Image joke
-                </p>
-              )}
-
-              {/* Meta row */}
-              <div className="mt-1 flex items-center gap-2 flex-wrap">
-                {joke.category && (
-                  <span className="rounded-full px-2 py-0.5 text-xs font-semibold"
-                        style={{ background: seen ? '#2D2D2D' : '#3D3010', color: seen ? '#6B7280' : '#FCD34D' }}>
-                    {joke.category}
-                  </span>
+            <div className="flex items-center gap-3 px-3 py-3">
+              <div className="min-w-0 flex-1">
+                {/* Text preview */}
+                {joke.content ? (
+                  <p
+                    className="text-sm font-semibold leading-snug"
+                    style={{ color: seen ? '#9CA3AF' : '#FDE68A', fontFamily: "'Nunito', sans-serif" }}
+                  >
+                    {preview(joke.content)}
+                  </p>
+                ) : (
+                  <p className="text-sm font-semibold" style={{ color: seen ? '#6B7280' : '#FCD34D', fontFamily: "'Nunito', sans-serif" }}>
+                    📷 Image
+                  </p>
                 )}
-                <span className="text-xs" style={{ color: seen ? '#4B5563' : '#9CA3AF' }}>
-                  {joke.author ?? 'Anonymous'} · {formatDate(joke.created_at)}
-                  {seen && <span className="ml-1 opacity-60">· seen</span>}
-                </span>
-              </div>
-            </div>
 
-            <ChevronDown
-              size={16}
-              className="shrink-0 text-gray-600"
-              style={{ transition: 'transform 0.2s', transform: expanded ? 'rotate(180deg)' : 'none' }}
-            />
+                {/* Meta row */}
+                <div className="mt-1 flex items-center gap-2 flex-wrap">
+                  {joke.category && (
+                    <span className="rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{ background: seen ? '#2D2D2D' : '#3D3010', color: seen ? '#6B7280' : '#FCD34D' }}>
+                      {joke.category}
+                    </span>
+                  )}
+                  <span className="text-xs" style={{ color: seen ? '#4B5563' : '#9CA3AF' }}>
+                    {joke.author ?? 'Anonymous'} · {formatDate(joke.created_at)}
+                    {seen && <span className="ml-1 opacity-60">· seen</span>}
+                  </span>
+                </div>
+              </div>
+
+              <ChevronDown
+                size={16}
+                className="shrink-0 text-gray-600"
+                style={{ transition: 'transform 0.2s', transform: expanded ? 'rotate(180deg)' : 'none' }}
+              />
+            </div>
           </div>
         )}
 
@@ -318,19 +317,21 @@ export default function JokesSection({ isOpen, onToggle }) {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <button
             onClick={e => { e.stopPropagation(); setShowAdd(v => !v); if (!isOpen) onToggle(); }}
-            className="flex items-center justify-center rounded-lg p-1 transition-colors hover:bg-yellow-900/40"
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg transition-colors hover:bg-yellow-900/40"
             style={{ color: '#FCD34D' }}
             title="Add joke"
           >
             <Plus size={16} />
           </button>
-          <ChevronDown
-            size={16}
-            style={{ color: '#FCD34D', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
-          />
+          <div className="flex min-h-[48px] min-w-[48px] items-center justify-center -mr-2">
+            <ChevronDown
+              size={16}
+              style={{ color: '#FCD34D', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }}
+            />
+          </div>
         </div>
       </div>
 

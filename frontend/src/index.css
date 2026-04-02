@@ -15,6 +15,12 @@
   --brand-blue:   #4A90A4;   /* teal-blue (KB)   */
 }
 
+@media (min-width: 768px) {
+  :root {
+    --bottom-nav-height: 0px;
+  }
+}
+
 body {
   margin: 0;
   background: var(--brand-bg);

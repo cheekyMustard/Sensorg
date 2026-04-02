@@ -6,6 +6,7 @@ import { getShopMeta } from '../../utils/shopColors.js';
 import { useUpdateRequest, useChangeStatus, useDeleteRequest } from '../../hooks/useRequests.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import ConfirmDialog from '../ConfirmDialog/ConfirmDialog.jsx';
+import { formatDate } from '../../utils/formatDate.js';
 
 function ShopChip({ name }) {
   const meta = getShopMeta(name);
@@ -38,10 +39,6 @@ const ROLE_CAN_TRANSITION = {
 };
 
 const ROLE_CAN_DELETE = ['organiser', 'admin'];
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-}
 
 const editInputCls = 'rounded-lg border px-3 py-1.5 text-sm outline-none transition-shadow w-full';
 const editInputStyle = { borderColor: 'var(--brand-border)' };
@@ -140,7 +137,7 @@ export default function RequestCard({ request }) {
         {request.bikes?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {request.bikes.map(b => (
-              <span key={b.id} className="rounded-full bg-white border px-2 py-0.5 text-xs" style={{ borderColor: 'var(--brand-border)', color: 'var(--charcoal)' }}>
+              <span key={b.id} className="rounded-full bg-white border px-2.5 py-0.5 text-sm font-semibold" style={{ borderColor: 'var(--brand-border)', color: 'var(--charcoal)' }}>
                 {b.label}
               </span>
             ))}
@@ -149,7 +146,7 @@ export default function RequestCard({ request }) {
 
         {/* Note (read view) */}
         {!isDirty && request.note && (
-          <p className="mt-2 text-xs text-gray-500 italic">{request.note}</p>
+          <p className="mt-2 text-sm italic text-gray-600">{request.note}</p>
         )}
 
         {/* Inline edit fields */}
@@ -200,8 +197,8 @@ export default function RequestCard({ request }) {
               <button
                 onClick={() => handleStatusClick(transition.to, transition.confirmTitle, transition.confirmMsg)}
                 disabled={statusMutation.isPending}
-                className="rounded-lg border px-3 py-1 text-xs font-medium transition-colors hover:bg-orange-50 disabled:opacity-50"
-                style={{ borderColor: 'var(--brand-border)', color: 'var(--charcoal)', background: '#fff' }}
+                className="rounded-lg px-3 py-1 text-xs font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                style={{ background: 'var(--brand)' }}
               >
                 {transition.label}
               </button>
@@ -242,8 +239,15 @@ export default function RequestCard({ request }) {
           </div>
 
           {/* Status badge + delete */}
-          <div className="flex items-center gap-2">
-            <span className="rounded-full border bg-white px-2 py-0.5 text-xs capitalize" style={{ borderColor: 'var(--brand-border)', color: '#888' }}>
+          <div className="flex items-center gap-1">
+            <span
+              className="rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize"
+              style={
+                request.status === 'open'        ? { background: '#E0F2FE', color: '#0369A1' } :
+                request.status === 'in_progress' ? { background: '#FEF3C7', color: '#92400E' } :
+                                                   { background: '#F3F4F6', color: '#6B7280' }
+              }
+            >
               {request.status.replace('_', ' ')}
             </span>
             {canDelete && !isDirty && (
@@ -251,7 +255,7 @@ export default function RequestCard({ request }) {
                 onClick={handleDelete}
                 disabled={deleteMutation.isPending}
                 aria-label="Delete request"
-                className="text-gray-400 hover:text-red-500 disabled:opacity-50"
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center text-gray-400 hover:text-red-500 disabled:opacity-50"
               >
                 <Trash2 size={15} />
               </button>

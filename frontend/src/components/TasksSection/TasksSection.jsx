@@ -16,9 +16,9 @@ export default function TasksSection({ tasks = [], loading, error, isOpen, onTog
         role="button"
         className="flex w-full items-center justify-between px-4 py-3.5 transition-all cursor-pointer"
         style={{
-          background: 'var(--brand-green)',
+          background: '#2D6A2D',
           borderRadius: isOpen ? '0.75rem 0.75rem 0 0' : '0.75rem',
-          boxShadow: isOpen ? 'none' : '0 3px 10px rgba(91,168,92,0.4)',
+          boxShadow: isOpen ? 'none' : '0 3px 10px rgba(45,106,45,0.4)',
         }}
       >
         <div className="flex flex-1 items-center gap-2">
@@ -37,18 +37,20 @@ export default function TasksSection({ tasks = [], loading, error, isOpen, onTog
             <button
               onClick={e => { e.stopPropagation(); onAdd(); }}
               aria-label="Add task"
-              className="flex h-7 w-7 items-center justify-center rounded-full transition-colors"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full transition-colors"
               style={{ background: 'rgba(255,255,255,0.2)' }}
             >
               <Plus size={16} className="text-white" />
             </button>
           )}
         </div>
-        <ChevronDown
-          size={18}
-          className="text-white"
-          style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
+        <div className="flex min-h-[48px] min-w-[48px] items-center justify-center -mr-2">
+          <ChevronDown
+            size={18}
+            className="text-white"
+            style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          />
+        </div>
       </div>
 
       {isOpen && (
